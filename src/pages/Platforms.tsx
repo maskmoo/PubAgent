@@ -73,26 +73,7 @@ export function Platforms() {
       const data = await resp.json();
       
       if (data?.success && data?.status) {
-        // If it's disconnected, but we want to simulate the user just logged in from the external tab
-        // Let's do a mock simulation: Randomly pretend we retrieved cookies successfully and save them to backend.
-        // In a real app, this would be an extension messaging or a real OAuth callback.
-        if (data.status === 'disconnected') {
-          // Mock retrieving cookies
-          const mockCookies = [{ name: 'session_id', value: 'mock_token_123', domain: `.${id}.com` }];
-          
-          await fetch(`/api/platforms/${id}/session`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ cookies: mockCookies }),
-          });
-          
-          // Re-fetch to confirm
-          const reResp = await fetch(`/api/platforms/${id}/status`);
-          const reData = await reResp.json();
-          setPlatformStatus(prev => ({ ...prev, [id]: reData.status || 'error' }));
-        } else {
-          setPlatformStatus(prev => ({ ...prev, [id]: data.status }));
-        }
+        setPlatformStatus(prev => ({ ...prev, [id]: data.status }));
       } else {
         setPlatformStatus(prev => ({ ...prev, [id]: 'error' }));
       }
