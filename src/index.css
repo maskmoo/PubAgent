@@ -31,6 +31,19 @@
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 267 100% 60%;
+    
+    /* Custom light mode colors */
+    --layout-bg: 0 0% 98%;
+    --layout-border: 0 0% 90%;
+    --sidebar-bg: 0 0% 100%;
+    --sidebar-hover: 0 0% 96%;
+    --card-bg: 0 0% 100%;
+    --text-primary: 0 0% 9%;
+    --text-secondary: 0 0% 40%;
+    --glass-bg: 0 0% 100%;
+    --glass-border: 0 0% 90%;
+    --code-bg: 0 0% 96%;
+    --input-bg: 0 0% 100%;
 
     --radius: 0.5rem;
   }
@@ -63,6 +76,19 @@
     --border: 0 0% 12%;
     --input: 0 0% 12%;
     --ring: 267 100% 65%;
+    
+    /* Custom dark mode colors */
+    --layout-bg: 0 0% 0%;
+    --layout-border: 0 0% 15%;
+    --sidebar-bg: 0 0% 3%;
+    --sidebar-hover: 0 0% 10%;
+    --card-bg: 0 0% 3%;
+    --text-primary: 0 0% 100%;
+    --text-secondary: 0 0% 60%;
+    --glass-bg: 0 0% 5%;
+    --glass-border: 0 0% 15%;
+    --code-bg: 0 0% 10%;
+    --input-bg: 0 0% 5%;
   }
 }
 
@@ -71,12 +97,12 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased min-h-screen selection:bg-primary/30;
+    @apply bg-background text-foreground antialiased min-h-screen selection:bg-primary/30 transition-colors duration-300;
     font-feature-settings: "rlig" 1, "calt" 1;
     font-family: 'Inter', system-ui, sans-serif;
   }
 }
 
 .editor-prose {
-  @apply prose prose-neutral dark:prose-invert max-w-none;
+  @apply prose prose-neutral dark:prose-invert max-w-none transition-colors duration-300;
 }

@@ -5,17 +5,34 @@ import { Editor } from "./pages/Editor";
 import { Platforms } from "./pages/Platforms";
 import { Workflows } from "./pages/Workflows";
 import { Settings } from "./pages/Settings";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 function App() {
-  // Force dark mode for that cyber/AI aesthetic
+  const [isDark, setIsDark] = useState(() => {
+    // Check local storage first
+    const saved = localStorage.getItem("theme");
+    if (saved) return saved === "dark";
+    // Otherwise check system preference
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
+
   useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
+    const root = window.document.documentElement;
+    if (isDark) {
+      root.classList.add("dark");
+      root.classList.remove("light");
+    } else {
+      root.classList.add("light");
+      root.classList.remove("dark");
+    }
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+  }, [isDark]);
+
+  const toggleTheme = () => setIsDark(!isDark);
 
   return (
     <BrowserRouter>
-      <AppLayout>
+      <AppLayout isDark={isDark} toggleTheme={toggleTheme}>
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/editor" element={<Editor />} />

@@ -8,14 +8,14 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-white text-black shadow hover:bg-white/90",
+          "bg-primary text-white shadow hover:bg-primary/90",
         destructive:
           "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         outline:
-          "border border-white/[0.1] bg-transparent shadow-sm hover:bg-white/[0.05] hover:text-white",
+          "border border-[var(--layout-border)] bg-transparent shadow-sm hover:bg-[var(--sidebar-hover)] text-[var(--text-primary)] transition-colors duration-300",
         secondary:
-          "bg-white/[0.05] text-white shadow-sm hover:bg-white/[0.1]",
-        ghost: "hover:bg-white/[0.05] hover:text-white",
+          "bg-[var(--sidebar-hover)] text-[var(--text-primary)] shadow-sm hover:bg-[var(--layout-border)] transition-colors duration-300",
+        ghost: "hover:bg-[var(--sidebar-hover)] text-[var(--text-primary)] transition-colors duration-300",
         link: "text-primary underline-offset-4 hover:underline",
         sparkle: "bg-primary text-white shadow-[0_0_15px_rgba(124,58,237,0.3)] hover:shadow-[0_0_25px_rgba(124,58,237,0.5)] border border-primary/50 transition-all duration-300",
       },

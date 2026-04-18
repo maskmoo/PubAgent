@@ -51,15 +51,15 @@ export function Workflows() {
   return (
     <div className="space-y-8 h-full flex flex-col">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-white">工作流规范与守护者</h1>
-        <p className="text-muted-foreground mt-2 text-sm">查看 AI 自动生成的 Markdown 规范，监控 AI Workflow Guardian 的自我修复日志。</p>
+        <h1 className="text-3xl font-bold tracking-tight text-[var(--text-primary)] transition-colors duration-300">工作流规范与守护者</h1>
+        <p className="text-[var(--text-secondary)] mt-2 text-sm transition-colors duration-300">查看 AI 自动生成的 Markdown 规范，监控 AI Workflow Guardian 的自我修复日志。</p>
       </div>
 
-      <div className="flex gap-4 border-b border-white/[0.05] pb-4">
+      <div className="flex gap-4 border-b border-[var(--layout-border)] pb-4 transition-colors duration-300">
         <Button 
           variant={activeTab === 'guardian' ? 'default' : 'ghost'} 
           onClick={() => setActiveTab('guardian')}
-          className={`gap-2 transition-all ${activeTab === 'guardian' ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'text-white/60 hover:text-white'}`}
+          className={`gap-2 transition-all duration-300 ${activeTab === 'guardian' ? 'bg-[var(--text-primary)] text-[var(--layout-bg)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
         >
           <ShieldAlert className="w-4 h-4" />
           AI 工作流守护者
@@ -67,7 +67,7 @@ export function Workflows() {
         <Button 
           variant={activeTab === 'spec' ? 'default' : 'ghost'} 
           onClick={() => setActiveTab('spec')}
-          className={`gap-2 transition-all ${activeTab === 'spec' ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 'text-white/60 hover:text-white'}`}
+          className={`gap-2 transition-all duration-300 ${activeTab === 'spec' ? 'bg-[var(--text-primary)] text-[var(--layout-bg)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}`}
         >
           <FileText className="w-4 h-4" />
           Markdown 工作流规范
@@ -77,10 +77,10 @@ export function Workflows() {
       <div className="flex-1 min-h-[500px]">
         {activeTab === 'guardian' ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
-            <Card className="col-span-1 lg:col-span-2 bg-[#050505] border-white/[0.05] font-mono text-sm flex flex-col shadow-inner relative overflow-hidden">
+            <Card className="col-span-1 lg:col-span-2 bg-[var(--code-bg)] border-[var(--layout-border)] font-mono text-sm flex flex-col shadow-inner relative overflow-hidden transition-colors duration-300">
               <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[80px] pointer-events-none" />
-              <CardHeader className="bg-white/[0.02] border-b border-white/[0.05] py-3 flex flex-row items-center justify-between z-10 backdrop-blur-sm">
-                <CardTitle className="text-xs text-white/60 flex items-center gap-2 tracking-widest uppercase">
+              <CardHeader className="bg-[var(--layout-bg)] border-b border-[var(--layout-border)] py-3 flex flex-row items-center justify-between z-10 backdrop-blur-sm transition-colors duration-300">
+                <CardTitle className="text-xs text-[var(--text-secondary)] flex items-center gap-2 tracking-widest uppercase transition-colors duration-300">
                   <Terminal className="w-4 h-4" />
                   执行与审计日志 (Audit Log)
                 </CardTitle>
@@ -99,14 +99,14 @@ export function Workflows() {
                       key={log.id} 
                       className="flex gap-4 group"
                     >
-                      <span className="text-white/30 flex-shrink-0 text-xs mt-0.5">{log.time}</span>
+                      <span className="text-[var(--text-secondary)]/50 flex-shrink-0 text-xs mt-0.5 transition-colors duration-300">{log.time}</span>
                       <span className={`
-                        text-sm leading-relaxed
-                        ${log.type === 'info' ? 'text-blue-400/90' : ''}
-                        ${log.type === 'warning' ? 'text-yellow-400/90' : ''}
-                        ${log.type === 'error' ? 'text-red-400/90' : ''}
-                        ${log.type === 'ai_fix' ? 'text-primary font-medium tracking-wide shadow-primary/20 drop-shadow-md' : ''}
-                        ${log.type === 'success' ? 'text-green-400/90' : ''}
+                        text-sm leading-relaxed transition-colors duration-300
+                        ${log.type === 'info' ? 'text-blue-600 dark:text-blue-400/90' : ''}
+                        ${log.type === 'warning' ? 'text-yellow-600 dark:text-yellow-400/90' : ''}
+                        ${log.type === 'error' ? 'text-red-600 dark:text-red-400/90' : ''}
+                        ${log.type === 'ai_fix' ? 'text-primary font-medium tracking-wide shadow-primary/20 drop-shadow-sm dark:drop-shadow-md' : ''}
+                        ${log.type === 'success' ? 'text-green-600 dark:text-green-400/90' : ''}
                       `}>
                         {log.message}
                       </span>
@@ -116,45 +116,45 @@ export function Workflows() {
               </ScrollArea>
             </Card>
 
-            <Card className="bg-white/[0.01] border-white/[0.05] relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
+            <Card className="bg-[var(--card-bg)] border-[var(--layout-border)] relative overflow-hidden shadow-sm transition-colors duration-300">
+              <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
               <CardHeader className="relative z-10">
-                <CardTitle className="flex items-center gap-2 text-white">
+                <CardTitle className="flex items-center gap-2 text-[var(--text-primary)] transition-colors duration-300">
                   <ShieldAlert className="w-5 h-5 text-primary" />
                   守护者状态
                 </CardTitle>
-                <CardDescription className="text-xs text-white/50">
+                <CardDescription className="text-xs text-[var(--text-secondary)] transition-colors duration-300">
                   自动修复平台 UI 变更导致的选择器失效
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6 relative z-10">
-                <div className="flex items-center justify-between p-3 bg-white/[0.03] border border-white/[0.05] rounded-xl backdrop-blur-md">
+                <div className="flex items-center justify-between p-3 bg-[var(--layout-bg)] border border-[var(--layout-border)] rounded-xl backdrop-blur-md transition-colors duration-300">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-500/10 border border-green-500/20 rounded-full shadow-[0_0_15px_rgba(34,197,94,0.15)]">
-                      <CheckCircle2 className="w-4 h-4 text-green-400" />
+                    <div className="p-2 bg-green-500/10 border border-green-500/20 rounded-full shadow-sm dark:shadow-[0_0_15px_rgba(34,197,94,0.15)]">
+                      <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400 transition-colors duration-300" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-white">守护进程</p>
-                      <p className="text-[11px] text-white/50 mt-0.5">正常运行中</p>
+                      <p className="text-sm font-medium text-[var(--text-primary)] transition-colors duration-300">守护进程</p>
+                      <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 transition-colors duration-300">正常运行中</p>
                     </div>
                   </div>
-                  <Badge variant="outline" className="bg-green-500/10 text-green-400 border-green-500/20 shadow-[0_0_10px_rgba(34,197,94,0.1)] uppercase text-[10px] tracking-wider">Active</Badge>
+                  <Badge variant="outline" className="bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 shadow-sm dark:shadow-[0_0_10px_rgba(34,197,94,0.1)] uppercase text-[10px] tracking-wider transition-colors duration-300">Active</Badge>
                 </div>
 
                 <div className="space-y-4">
-                  <h4 className="text-xs font-medium flex items-center gap-2 text-white/50 uppercase tracking-wider">
+                  <h4 className="text-xs font-medium flex items-center gap-2 text-[var(--text-secondary)] uppercase tracking-wider transition-colors duration-300">
                     <History className="w-3.5 h-3.5" /> 最近修复记录
                   </h4>
-                  <div className="border border-white/[0.05] rounded-xl p-4 space-y-3 bg-[#030303]">
+                  <div className="border border-[var(--layout-border)] rounded-xl p-4 space-y-3 bg-[var(--layout-bg)] transition-colors duration-300">
                     <div className="flex justify-between items-start">
-                      <Badge variant="outline" className="border-primary/30 text-primary bg-primary/10 shadow-[0_0_10px_rgba(124,58,237,0.1)]">知乎</Badge>
-                      <span className="text-[11px] text-white/40 font-mono">2 分钟前</span>
+                      <Badge variant="outline" className="border-primary/30 text-primary bg-primary/10 shadow-sm dark:shadow-[0_0_10px_rgba(124,58,237,0.1)]">知乎</Badge>
+                      <span className="text-[11px] text-[var(--text-secondary)] font-mono transition-colors duration-300">2 分钟前</span>
                     </div>
-                    <p className="text-sm text-white/80">修复了发布按钮选择器失效的问题</p>
-                    <div className="flex items-center gap-2 text-xs text-white/60 font-mono bg-white/[0.03] border border-white/[0.05] p-2.5 rounded-lg overflow-hidden">
-                      <span className="line-through text-red-400/70 truncate">button.PublishButton</span>
-                      <ArrowRight className="w-3 h-3 flex-shrink-0 text-white/30" />
-                      <span className="text-green-400/90 truncate">.WritePanel-publishBtn</span>
+                    <p className="text-sm text-[var(--text-primary)] transition-colors duration-300">修复了发布按钮选择器失效的问题</p>
+                    <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] font-mono bg-[var(--sidebar-hover)] border border-[var(--layout-border)] p-2.5 rounded-lg overflow-hidden transition-colors duration-300">
+                      <span className="line-through text-red-600/70 dark:text-red-400/70 truncate transition-colors duration-300">button.PublishButton</span>
+                      <ArrowRight className="w-3 h-3 flex-shrink-0 text-[var(--text-secondary)]/50 transition-colors duration-300" />
+                      <span className="text-green-600/90 dark:text-green-400/90 truncate transition-colors duration-300">.WritePanel-publishBtn</span>
                     </div>
                   </div>
                 </div>
@@ -162,25 +162,25 @@ export function Workflows() {
             </Card>
           </div>
         ) : (
-          <Card className="h-full bg-[#050505] border-white/[0.05] flex flex-col shadow-inner relative overflow-hidden">
+          <Card className="h-full bg-[var(--code-bg)] border-[var(--layout-border)] flex flex-col shadow-inner relative overflow-hidden transition-colors duration-300">
             <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-            <CardHeader className="bg-white/[0.02] border-b border-white/[0.05] flex flex-row items-center justify-between py-3 backdrop-blur-sm z-10">
-              <CardTitle className="text-xs text-white/60 flex items-center gap-2 font-mono">
+            <CardHeader className="bg-[var(--layout-bg)] border-b border-[var(--layout-border)] flex flex-row items-center justify-between py-3 backdrop-blur-sm z-10 transition-colors duration-300">
+              <CardTitle className="text-xs text-[var(--text-secondary)] flex items-center gap-2 font-mono transition-colors duration-300">
                 <FileText className="w-4 h-4" />
                 /docs/workflow/zhihu.md
               </CardTitle>
               <div className="flex gap-2">
-                <Button variant="ghost" size="sm" className="h-8 text-xs text-white/50 hover:text-white hover:bg-white/[0.05]">
+                <Button variant="ghost" size="sm" className="h-8 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--sidebar-hover)] transition-colors duration-300">
                   <RotateCcw className="w-3 h-3 mr-2" />
                   回滚版本
                 </Button>
-                <Button size="sm" className="h-8 text-xs bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 shadow-[0_0_15px_rgba(124,58,237,0.15)]">
+                <Button size="sm" className="h-8 text-xs bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 shadow-sm dark:shadow-[0_0_15px_rgba(124,58,237,0.15)]">
                   自动生成 TS 代码
                 </Button>
               </div>
             </CardHeader>
             <ScrollArea className="flex-1 p-8 z-10">
-              <pre className="font-mono text-[13px] text-white/70 leading-loose">
+              <pre className="font-mono text-[13px] text-[var(--text-primary)]/80 leading-loose transition-colors duration-300">
                 <code>{mockWorkflowSpec}</code>
               </pre>
             </ScrollArea>
