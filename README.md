@@ -5,6 +5,7 @@
 ## 🌟 核心特性 (Features)
 
 - **🤖 AI Spec Discovery**: 自动探索未知目标平台的网页结构，生成发布流程，彻底免除手写爬虫脚本的烦恼。
+- **🔌 PubAgent Sync**: 独创浏览器扩展接管模式，用户使用日常浏览器登录，一键安全同步真实凭证（Cookies）至本地服务器，**最大程度降低风控风险**。
 - **✨ AI 内容优化**: 针对不同平台的调性（知乎、掘金、CSDN等），自动提取 SEO 关键词并重写标题和文风。
 - **🛡️ AI Workflow Guardian**: 持续监控工作流，在平台 UI 变更导致失败时，自动分析 DOM 并自我修复。
 - **⏱️ 智能排期**: 根据各平台数据分析，自动计算互动率最高的“黄金时间”进行排期发布。
@@ -13,24 +14,13 @@
 ## 📂 目录结构 (Architecture)
 
 ```text
-├── src/
-│   ├── api/          # 存放与后端交互的请求逻辑 (axios/fetch)
-│   ├── assets/       # 静态资源 (图片、字体等)
-│   ├── components/   # UI 组件
-│   │   ├── layout/   # 全局布局组件 (AppLayout)
-│   │   └── ui/       # 基础通用组件 (Button, Card, Input 等 - 基于 shadcn)
-│   ├── constants/    # 全局常量定义 (API配置、平台列表等)
-│   ├── hooks/        # React 自定义 Hook (useAuth, useWorkflow 等)
-│   ├── pages/        # 页面视图 (Dashboard, Editor, Platforms 等)
-│   ├── store/        # 全局状态管理 (Zustand)
-│   ├── types/        # TypeScript 类型定义 (.d.ts)
-│   ├── utils/        # 工具函数 (cn, formatters 等)
-│   ├── App.tsx       # 根组件路由配置
-│   └── main.tsx      # React 渲染入口
-├── docs/             # 文档目录
-│   └── workflow/     # AI 探索生成的各平台 Markdown 工作流规范
-├── package.json      # 项目依赖
-└── tailwind.config.js# Tailwind 配置
+├── src/            # 前端 React 源代码
+├── server/         # 本地 Node.js / SQLite 后端服务
+├── extension/      # Chrome/Edge 浏览器同步扩展 (PubAgent Sync)
+├── docs/           # 文档目录
+│   └── workflow/   # AI 探索生成的各平台 Markdown 工作流规范
+├── package.json    # 项目依赖
+└── tailwind.config.js # Tailwind 配置
 ```
 
 ## 🚀 快速开始 (Getting Started)
@@ -60,6 +50,17 @@ pnpm run build
 # 预览生产构建结果
 pnpm run preview
 ```
+
+## 🧩 安装浏览器同步插件 (Extension)
+
+要使用本系统的一键分发功能，您需要将登录凭证安全地同步到本地数据库。
+
+1. 打开 Chrome / Edge 浏览器，前往 `chrome://extensions/`（或 `edge://extensions/`）。
+2. 在右上角开启 **“开发者模式” (Developer mode)**。
+3. 点击 **“加载已解压的扩展程序” (Load unpacked)**。
+4. 选中本项目根目录下的 `extension` 文件夹并确认。
+5. 在日常浏览器中登录知乎、掘金等平台，点击浏览器右上角的 **PubAgent Sync** 图标进行“一键同步”。
+> 详细说明请参考：[PubAgent Sync 插件使用指南](./extension/README.md)
 
 ## 🛠️ 技术栈 (Tech Stack)
 

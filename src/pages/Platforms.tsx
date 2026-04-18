@@ -68,8 +68,10 @@ export function Platforms() {
     setCheckingStatus(prev => ({ ...prev, [id]: true }));
     
     try {
+      // Fetch status from backend
       const resp = await fetch(`/api/platforms/${id}/status`);
       const data = await resp.json();
+      
       if (data?.success && data?.status) {
         setPlatformStatus(prev => ({ ...prev, [id]: data.status }));
       } else {
