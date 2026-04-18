@@ -5,12 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Save, Key, Cpu, ShieldCheck, Loader2, XCircle, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { useSettingsStore } from "@/store/useSettingsStore";
 
 export function Settings() {
-  const [openAiKey, setOpenAiKey] = useState("sk-************************************");
-  const [openAiBaseUrl, setOpenAiBaseUrl] = useState("https://api.openai.com/v1");
-  const [anthropicKey, setAnthropicKey] = useState("");
-  
+  const { openAiKey, setOpenAiKey, openAiBaseUrl, setOpenAiBaseUrl, anthropicKey, setAnthropicKey } = useSettingsStore();
+
   const [isTestingOpenAI, setIsTestingOpenAI] = useState(false);
   const [openAiStatus, setOpenAiStatus] = useState<'idle' | 'success' | 'error'>('success'); // default to success as it was hardcoded
 

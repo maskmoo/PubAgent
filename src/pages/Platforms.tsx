@@ -32,25 +32,30 @@ export function Platforms() {
     setPlatformStatus(initialStatus);
   }, []);
 
-  const handleDiscovery = () => {
+  const handleDiscovery = async () => {
     if (!newUrl) return;
     setIsDiscovering(true);
     setDiscoveredPlatform(null);
 
-    // Simulate AI Vision Discovery with a realistic URL parsing
-    setTimeout(() => {
-      setIsDiscovering(false);
+    try {
+      const response = await fetch("/api/discover-platform", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: newUrl }),
+      });
+      const data = await response.json();
       
-      // Extract domain name from URL
-      try {
-        const urlObj = new URL(newUrl.startsWith('http') ? newUrl : `https://${newUrl}`);
-        setDiscoveredPlatform(urlObj.hostname.replace('www.', ''));
-      } catch (e) {
-        setDiscoveredPlatform(newUrl);
+      if (data.success) {
+        setDiscoveredPlatform(data.platform);
       }
-      
+    } catch (error) {
+      console.error(error);
+      // Fallback
+      setDiscoveredPlatform(newUrl);
+    } finally {
+      setIsDiscovering(false);
       setNewUrl("");
-    }, 3000);
+    }
   };
 
   const checkPlatformStatus = (id: string) => {

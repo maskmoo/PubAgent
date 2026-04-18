@@ -10,6 +10,7 @@ import { Sparkles, Send, Loader2, Save, FileText, Video, UploadCloud } from "luc
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from "framer-motion";
+import { useSettingsStore } from "@/store/useSettingsStore";
 
 const articlePlatforms = [
   { id: "zhihu", name: "知乎", selected: true },
@@ -27,6 +28,7 @@ const videoPlatforms = [
 
 export function Editor() {
   const [activeTab, setActiveTab] = useState("article");
+  const { openAiKey, openAiBaseUrl } = useSettingsStore();
   
   // Article states
   const [title, setTitle] = useState("");
@@ -47,24 +49,62 @@ export function Editor() {
 
   const handleOptimize = async () => {
     setIsOptimizing(true);
-    // Simulate AI processing
-    setTimeout(() => {
-      setOptimizedContent(
-        `# ${title || "这里是 AI 优化的标题"}\n\n> 🤖 **AI 摘要**：本文将探讨最新技术在全平台的应用，为您带来深入的见解与实战指南。\n\n${content}\n\n## 核心要点\n- 🚀 性能优化\n- 💡 架构升级\n\n---\n*本文由 PubAgent 辅助排版与优化*`
-      );
+    setOptimizedContent("");
+    try {
+      const response = await fetch("/api/optimize", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${openAiKey}`,
+          "x-base-url": openAiBaseUrl,
+        },
+        body: JSON.stringify({ title, content }),
+      });
+
+      if (!response.ok || !response.body) throw new Error("Optimization failed");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        setOptimizedContent((prev) => prev + chunk);
+      }
+    } catch (error) {
+      console.error(error);
+      setOptimizedContent("优化失败，请检查设置页面的 API Key 是否正确填写。");
+    } finally {
       setIsOptimizing(false);
-    }, 2000);
+    }
   };
 
   const handleGenerateTags = async () => {
     setIsGeneratingTags(true);
-    setTimeout(() => {
+    try {
+      const response = await fetch("/api/generate-tags", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${openAiKey}`,
+          "x-base-url": openAiBaseUrl,
+        },
+        body: JSON.stringify({ title: videoTitle, description: videoDesc }),
+      });
+      const data = await response.json();
+      if (data.tags) {
+        setGeneratedTags(data.tags);
+      }
+    } catch (error) {
+      console.error(error);
       setGeneratedTags(["#科技探索", "#AI", "#提效神器", "#自媒体", "#干货分享"]);
+    } finally {
       setIsGeneratingTags(false);
-    }, 1500);
+    }
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     // Basic validation
     if (activeTab === 'article' && !title && !content) return;
     if (activeTab === 'video' && !videoFile) return;
@@ -72,14 +112,29 @@ export function Editor() {
     setIsPublishing(true);
     setPublishSuccess(false);
 
-    // Simulate multi-platform publishing process
-    setTimeout(() => {
-      setIsPublishing(false);
+    try {
+      const platforms = activeTab === 'article' 
+        ? articlePlatforms.filter(p => p.selected).map(p => p.id)
+        : videoPlatforms.filter(p => p.selected).map(p => p.id);
+
+      await fetch("/api/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: activeTab,
+          content: activeTab === 'article' ? (optimizedContent || content) : videoTitle,
+          platforms
+        }),
+      });
+
       setPublishSuccess(true);
-      
       // Reset success state after a while
       setTimeout(() => setPublishSuccess(false), 3000);
-    }, 2500);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsPublishing(false);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
