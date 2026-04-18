@@ -89,7 +89,7 @@ export function Editor() {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0 h-full">
         <TabsList className="grid w-full max-w-[400px] grid-cols-2 mb-6">
           <TabsTrigger value="article" className="gap-2">
             <FileText className="w-4 h-4" />
@@ -101,7 +101,7 @@ export function Editor() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="article" className="flex-1 flex flex-col gap-6 m-0 border-none p-0 outline-none">
+        <TabsContent value="article" className="flex-1 flex flex-col gap-6 m-0 border-none p-0 outline-none data-[state=active]:flex">
           <Card className="bg-[var(--card-bg)] border-[var(--layout-border)] p-4 flex items-center gap-4 shadow-sm transition-colors duration-300">
             <Label className="text-[var(--text-secondary)] whitespace-nowrap text-sm font-medium transition-colors duration-300">分发平台:</Label>
             <div className="flex gap-2 flex-wrap">
@@ -193,7 +193,7 @@ export function Editor() {
           </div>
         </TabsContent>
 
-        <TabsContent value="video" className="flex-1 flex flex-col gap-6 m-0 border-none p-0 outline-none">
+        <TabsContent value="video" className="flex-1 flex flex-col gap-6 m-0 border-none p-0 outline-none data-[state=active]:flex">
           <Card className="bg-[var(--card-bg)] border-[var(--layout-border)] p-4 flex items-center gap-4 shadow-sm transition-colors duration-300">
             <Label className="text-[var(--text-secondary)] whitespace-nowrap text-sm font-medium transition-colors duration-300">分发平台:</Label>
             <div className="flex gap-2 flex-wrap">
