@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 
 export function Settings() {
   const [openAiKey, setOpenAiKey] = useState("sk-************************************");
+  const [openAiBaseUrl, setOpenAiBaseUrl] = useState("https://api.openai.com/v1");
   const [anthropicKey, setAnthropicKey] = useState("");
   
   const [isTestingOpenAI, setIsTestingOpenAI] = useState(false);
@@ -23,7 +24,8 @@ export function Settings() {
     setOpenAiStatus('idle');
     
     try {
-      const response = await fetch('https://api.openai.com/v1/models', {
+      const baseUrl = openAiBaseUrl.replace(/\/$/, ''); // Remove trailing slash if any
+      const response = await fetch(`${baseUrl}/models`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${openAiKey}`,
@@ -82,13 +84,15 @@ export function Settings() {
                 AI 大模型密钥配置
               </CardTitle>
               <CardDescription className="text-[var(--text-secondary)] transition-colors duration-300">
-                填写您的 API Key 以激活 AI Spec Discovery 与内容优化功能。支持 OpenAI 和 Anthropic。
+                填写您的 API Key 以激活 AI Spec Discovery 与内容优化功能。支持 OpenAI, DeepSeek, 和 Anthropic。
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6 relative z-10">
-              <div className="space-y-3">
+              <div className="space-y-3 p-4 bg-[var(--layout-bg)] rounded-xl border border-[var(--layout-border)] transition-colors duration-300 shadow-sm">
                 <Label htmlFor="openai" className="flex items-center justify-between text-[var(--text-primary)] transition-colors duration-300">
-                  OpenAI API Key
+                  <span className="flex items-center gap-2">
+                    OpenAI / DeepSeek <span className="text-[var(--text-secondary)] font-normal text-xs">(兼容接口)</span>
+                  </span>
                   {openAiStatus === 'success' && (
                     <span className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1.5 font-medium px-2 py-0.5 bg-green-500/10 border border-green-500/20 rounded transition-colors duration-300">
                       <ShieldCheck className="w-3.5 h-3.5" /> 已验证
@@ -105,36 +109,57 @@ export function Settings() {
                     </span>
                   )}
                 </Label>
-                <div className="flex gap-3">
-                  <Input 
-                    id="openai" 
-                    type="password" 
-                    value={openAiKey} 
-                    onChange={(e) => {
-                      setOpenAiKey(e.target.value);
-                      setOpenAiStatus('idle');
-                    }} 
-                    className="font-mono bg-[var(--input-bg)] border-[var(--layout-border)] focus-visible:ring-primary focus-visible:border-primary shadow-inner text-[var(--text-primary)] h-11 rounded-lg transition-colors duration-300"
-                  />
-                  <Button 
-                    variant="outline" 
-                    onClick={handleTestOpenAI}
-                    disabled={isTestingOpenAI || !openAiKey}
-                    className="h-11 px-6 bg-[var(--layout-bg)] hover:bg-[var(--sidebar-hover)] text-[var(--text-primary)] transition-colors duration-300"
-                  >
-                    {isTestingOpenAI ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        测试中
-                      </>
-                    ) : (
-                      "测试连接"
-                    )}
-                  </Button>
+                
+                <div className="grid gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="openaiBaseUrl" className="text-xs text-[var(--text-secondary)]">Base URL</Label>
+                    <Input 
+                      id="openaiBaseUrl" 
+                      value={openAiBaseUrl} 
+                      onChange={(e) => {
+                        setOpenAiBaseUrl(e.target.value);
+                        setOpenAiStatus('idle');
+                      }} 
+                      placeholder="https://api.openai.com/v1"
+                      className="font-mono text-sm bg-[var(--input-bg)] border-[var(--layout-border)] focus-visible:ring-primary shadow-inner text-[var(--text-primary)] h-10 rounded-lg transition-colors duration-300"
+                    />
+                    <p className="text-[10px] text-[var(--text-secondary)]">DeepSeek 填写: https://api.deepseek.com/v1</p>
+                  </div>
+                  
+                  <div className="space-y-1.5">
+                    <Label htmlFor="openai" className="text-xs text-[var(--text-secondary)]">API Key</Label>
+                    <div className="flex gap-3">
+                      <Input 
+                        id="openai" 
+                        type="password" 
+                        value={openAiKey} 
+                        onChange={(e) => {
+                          setOpenAiKey(e.target.value);
+                          setOpenAiStatus('idle');
+                        }} 
+                        className="font-mono bg-[var(--input-bg)] border-[var(--layout-border)] focus-visible:ring-primary focus-visible:border-primary shadow-inner text-[var(--text-primary)] h-11 rounded-lg transition-colors duration-300"
+                      />
+                      <Button 
+                        variant="outline" 
+                        onClick={handleTestOpenAI}
+                        disabled={isTestingOpenAI || !openAiKey}
+                        className="h-11 px-6 bg-[var(--layout-bg)] hover:bg-[var(--sidebar-hover)] text-[var(--text-primary)] transition-colors duration-300"
+                      >
+                        {isTestingOpenAI ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            测试中
+                          </>
+                        ) : (
+                          "测试连接"
+                        )}
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
               
-              <div className="space-y-3">
+              <div className="space-y-3 p-4 bg-[var(--layout-bg)] rounded-xl border border-[var(--layout-border)] transition-colors duration-300 shadow-sm">
                 <Label htmlFor="anthropic" className="flex items-center justify-between text-[var(--text-primary)] transition-colors duration-300">
                   Anthropic API Key <span className="text-[var(--text-secondary)] ml-2 font-normal text-xs transition-colors duration-300">(Claude)</span>
                   {anthropicStatus === 'success' && (
