@@ -60,8 +60,9 @@ export function Platforms() {
     setTimeout(() => {
       setCheckingStatus(prev => ({ ...prev, [id]: false }));
       
-      // Randomly resolve to success or error for demo
-      const statuses: Array<'active' | 'error' | 'expired'> = ['active', 'active', 'active', 'expired'];
+      // In a real app, this would check if the authentication token/cookie is valid
+      // For demo, we just randomly resolve to success or error
+      const statuses: Array<'active' | 'error' | 'expired'> = ['active', 'active', 'active', 'active', 'active', 'expired'];
       const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
       
       setPlatformStatus(prev => ({ ...prev, [id]: randomStatus }));
@@ -179,7 +180,7 @@ export function Platforms() {
           </Button>
         </div>
         
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {defaultPlatforms.map((platform) => {
             const isChecking = checkingStatus[platform.id];
             const status = platformStatus[platform.id] || 'active';
@@ -187,8 +188,8 @@ export function Platforms() {
             return (
               <Card key={platform.id} className="bg-[var(--card-bg)] border-[var(--layout-border)] hover:border-primary/30 hover:bg-[var(--sidebar-hover)] transition-all duration-300 group cursor-pointer overflow-hidden relative shadow-sm">
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <CardContent className="p-6 flex flex-col items-center text-center space-y-5 relative z-10">
-                  <div className="absolute top-3 right-3">
+                <CardContent className="p-4 flex flex-col items-center text-center space-y-3 relative z-10">
+                  <div className="absolute top-2 right-2">
                     <Button 
                       variant="ghost" 
                       size="icon" 
@@ -203,40 +204,40 @@ export function Platforms() {
                     </Button>
                   </div>
                   
-                  <div className="w-16 h-16 rounded-2xl bg-[var(--layout-bg)] border border-[var(--layout-border)] flex items-center justify-center group-hover:scale-110 group-hover:border-primary/30 transition-all duration-500 shadow-sm">
-                    <platform.icon className="w-7 h-7 text-[var(--text-secondary)] group-hover:text-primary transition-colors duration-500" />
+                  <div className="w-12 h-12 rounded-2xl bg-[var(--layout-bg)] border border-[var(--layout-border)] flex items-center justify-center group-hover:scale-110 group-hover:border-primary/30 transition-all duration-500 shadow-sm">
+                    <platform.icon className="w-5 h-5 text-[var(--text-secondary)] group-hover:text-primary transition-colors duration-500" />
                   </div>
-                  <div>
-                    <h4 className="font-bold text-lg text-[var(--text-primary)] group-hover:text-primary transition-colors duration-300">{platform.name}</h4>
-                    <p className="text-xs text-[var(--text-secondary)] font-mono mt-1.5 bg-[var(--layout-bg)] px-2 py-0.5 rounded-md border border-[var(--layout-border)] inline-block transition-colors duration-300">{platform.url}</p>
+                  <div className="space-y-1">
+                    <h4 className="font-bold text-base text-[var(--text-primary)] group-hover:text-primary transition-colors duration-300">{platform.name}</h4>
+                    <p className="text-[10px] text-[var(--text-secondary)] font-mono bg-[var(--layout-bg)] px-2 py-0.5 rounded-md border border-[var(--layout-border)] inline-block transition-colors duration-300">{platform.url}</p>
                   </div>
                   
                   <AnimatePresence mode="wait">
                     {isChecking ? (
                       <motion.div key="checking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                        <Badge variant="outline" className="px-3 bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.05)] transition-colors duration-300">
-                          <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                        <Badge variant="outline" className="px-2.5 py-0.5 text-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.05)] transition-colors duration-300">
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
                           检测中...
                         </Badge>
                       </motion.div>
                     ) : status === 'active' ? (
                       <motion.div key="active" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                        <Badge variant="outline" className="px-3 bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 shadow-[0_0_10px_rgba(34,197,94,0.05)] transition-colors duration-300">
-                          <CheckCircle2 className="w-3 h-3 mr-1.5" />
-                          账号已连接
+                        <Badge variant="outline" className="px-2.5 py-0.5 text-[10px] bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 shadow-[0_0_10px_rgba(34,197,94,0.05)] transition-colors duration-300">
+                          <CheckCircle2 className="w-3 h-3 mr-1" />
+                          已连接
                         </Badge>
                       </motion.div>
                     ) : status === 'expired' ? (
                       <motion.div key="expired" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                        <Badge variant="outline" className="px-3 bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border-yellow-500/20 shadow-[0_0_10px_rgba(234,179,8,0.05)] transition-colors duration-300">
-                          <XCircle className="w-3 h-3 mr-1.5" />
-                          登录已过期
+                        <Badge variant="outline" className="px-2.5 py-0.5 text-[10px] bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border-yellow-500/20 shadow-[0_0_10px_rgba(234,179,8,0.05)] transition-colors duration-300">
+                          <XCircle className="w-3 h-3 mr-1" />
+                          已过期
                         </Badge>
                       </motion.div>
                     ) : (
                       <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                        <Badge variant="outline" className="px-3 bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.05)] transition-colors duration-300">
-                          <XCircle className="w-3 h-3 mr-1.5" />
+                        <Badge variant="outline" className="px-2.5 py-0.5 text-[10px] bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.05)] transition-colors duration-300">
+                          <XCircle className="w-3 h-3 mr-1" />
                           连接失败
                         </Badge>
                       </motion.div>
@@ -253,8 +254,8 @@ export function Platforms() {
               <Card className="bg-primary/5 dark:bg-primary/[0.02] border-primary/30 shadow-[0_0_20px_-5px_rgba(124,58,237,0.1)] dark:shadow-[0_0_20px_-5px_rgba(124,58,237,0.3)] group cursor-pointer relative overflow-hidden transition-colors duration-300">
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-50" />
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl" />
-                <CardContent className="p-6 flex flex-col items-center text-center space-y-5 relative z-10">
-                  <div className="absolute top-3 right-3">
+                <CardContent className="p-4 flex flex-col items-center text-center space-y-3 relative z-10">
+                  <div className="absolute top-2 right-2">
                     <Button 
                       variant="ghost" 
                       size="icon" 
@@ -269,34 +270,34 @@ export function Platforms() {
                     </Button>
                   </div>
                   
-                  <div className="w-16 h-16 rounded-2xl bg-primary/10 dark:bg-primary/20 border border-primary/40 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-[0_0_15px_rgba(124,58,237,0.1)] dark:shadow-[0_0_15px_rgba(124,58,237,0.2)]">
-                    <Sparkles className="w-7 h-7 text-primary" />
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 dark:bg-primary/20 border border-primary/40 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-[0_0_15px_rgba(124,58,237,0.1)] dark:shadow-[0_0_15px_rgba(124,58,237,0.2)]">
+                    <Sparkles className="w-5 h-5 text-primary" />
                   </div>
-                  <div>
-                    <h4 className="font-bold text-lg text-[var(--text-primary)] transition-colors duration-300">新探索平台</h4>
-                    <p className="text-xs text-primary/70 font-mono mt-1.5 bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20 inline-block truncate max-w-[120px] transition-colors duration-300">{discoveredPlatform}</p>
+                  <div className="space-y-1">
+                    <h4 className="font-bold text-base text-[var(--text-primary)] transition-colors duration-300">新探索平台</h4>
+                    <p className="text-[10px] text-primary/70 font-mono bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20 inline-block truncate max-w-[120px] transition-colors duration-300">{discoveredPlatform}</p>
                   </div>
                   
                   <AnimatePresence mode="wait">
                     {checkingStatus['discovered'] ? (
                       <motion.div key="checking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                        <Badge variant="outline" className="px-3 bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.05)] transition-colors duration-300">
-                          <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                        <Badge variant="outline" className="px-2.5 py-0.5 text-[10px] bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.05)] transition-colors duration-300">
+                          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
                           检测中...
                         </Badge>
                       </motion.div>
                     ) : platformStatus['discovered'] === 'expired' ? (
                       <motion.div key="expired" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                        <Badge variant="outline" className="px-3 bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border-yellow-500/20 shadow-[0_0_10px_rgba(234,179,8,0.05)] transition-colors duration-300">
-                          <XCircle className="w-3 h-3 mr-1.5" />
-                          登录已过期
+                        <Badge variant="outline" className="px-2.5 py-0.5 text-[10px] bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border-yellow-500/20 shadow-[0_0_10px_rgba(234,179,8,0.05)] transition-colors duration-300">
+                          <XCircle className="w-3 h-3 mr-1" />
+                          已过期
                         </Badge>
                       </motion.div>
                     ) : (
                       <motion.div key="active" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                        <Badge className="px-3 bg-primary text-white border-0 shadow-[0_0_15px_rgba(124,58,237,0.4)] hover:bg-primary">
-                          <Sparkles className="w-3 h-3 mr-1.5" />
-                          AI 自动适配成功
+                        <Badge className="px-2.5 py-0.5 text-[10px] bg-primary text-white border-0 shadow-[0_0_15px_rgba(124,58,237,0.4)] hover:bg-primary">
+                          <Sparkles className="w-3 h-3 mr-1" />
+                          自动适配成功
                         </Badge>
                       </motion.div>
                     )}
