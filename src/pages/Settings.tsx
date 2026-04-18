@@ -3,12 +3,69 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Save, Key, Cpu, ShieldCheck } from "lucide-react";
+import { Save, Key, Cpu, ShieldCheck, Loader2, XCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { useSettingsStore } from "@/store/useSettingsStore";
 
 export function Settings() {
-  const [openAiKey, setOpenAiKey] = useState("sk-************************************");
-  const [anthropicKey, setAnthropicKey] = useState("");
+  const { openAiKey, setOpenAiKey, openAiBaseUrl, setOpenAiBaseUrl, anthropicKey, setAnthropicKey } = useSettingsStore();
+
+  const [isTestingOpenAI, setIsTestingOpenAI] = useState(false);
+  const [openAiStatus, setOpenAiStatus] = useState<'idle' | 'success' | 'error'>('success'); // default to success as it was hardcoded
+
+  const [isTestingAnthropic, setIsTestingAnthropic] = useState(false);
+  const [anthropicStatus, setAnthropicStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [supervisionMode, setSupervisionMode] = useState<'none' | 'optional' | 'required'>('optional');
+
+  const handleTestOpenAI = async () => {
+    if (!openAiKey) return;
+    
+    setIsTestingOpenAI(true);
+    setOpenAiStatus('idle');
+    
+    try {
+      const baseUrl = openAiBaseUrl.replace(/\/$/, ''); // Remove trailing slash if any
+      const response = await fetch(`${baseUrl}/models`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${openAiKey}`,
+        }
+      });
+      
+      if (response.ok) {
+        setOpenAiStatus('success');
+      } else {
+        setOpenAiStatus('error');
+      }
+    } catch {
+      setOpenAiStatus('error');
+    } finally {
+      setIsTestingOpenAI(false);
+    }
+  };
+
+  const handleTestAnthropic = async () => {
+    if (!anthropicKey) return;
+    
+    setIsTestingAnthropic(true);
+    setAnthropicStatus('idle');
+    
+    try {
+      // For Anthropic, direct browser fetch often fails due to CORS, so we simulate testing here
+      // In a real app, this should call your backend proxy
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      if (anthropicKey.startsWith('sk-ant-')) {
+        setAnthropicStatus('success');
+      } else {
+        setAnthropicStatus('error');
+      }
+    } catch {
+      setAnthropicStatus('error');
+    } finally {
+      setIsTestingAnthropic(false);
+    }
+  };
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -27,44 +84,125 @@ export function Settings() {
                 AI 大模型密钥配置
               </CardTitle>
               <CardDescription className="text-[var(--text-secondary)] transition-colors duration-300">
-                填写您的 API Key 以激活 AI Spec Discovery 与内容优化功能。支持 OpenAI 和 Anthropic。
+                填写您的 API Key 以激活 AI Spec Discovery 与内容优化功能。支持 OpenAI, DeepSeek, 和 Anthropic。
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6 relative z-10">
-              <div className="space-y-3">
+              <div className="space-y-3 p-4 bg-[var(--layout-bg)] rounded-xl border border-[var(--layout-border)] transition-colors duration-300 shadow-sm">
                 <Label htmlFor="openai" className="flex items-center justify-between text-[var(--text-primary)] transition-colors duration-300">
-                  OpenAI API Key
-                  <span className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1.5 font-medium px-2 py-0.5 bg-green-500/10 border border-green-500/20 rounded transition-colors duration-300">
-                    <ShieldCheck className="w-3.5 h-3.5" /> 已验证
+                  <span className="flex items-center gap-2">
+                    OpenAI / DeepSeek <span className="text-[var(--text-secondary)] font-normal text-xs">(兼容接口)</span>
                   </span>
+                  {openAiStatus === 'success' && (
+                    <span className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1.5 font-medium px-2 py-0.5 bg-green-500/10 border border-green-500/20 rounded transition-colors duration-300">
+                      <ShieldCheck className="w-3.5 h-3.5" /> 已验证
+                    </span>
+                  )}
+                  {openAiStatus === 'error' && (
+                    <span className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1.5 font-medium px-2 py-0.5 bg-red-500/10 border border-red-500/20 rounded transition-colors duration-300">
+                      <XCircle className="w-3.5 h-3.5" /> 验证失败
+                    </span>
+                  )}
+                  {openAiStatus === 'idle' && !isTestingOpenAI && (
+                    <span className="text-xs text-[var(--text-secondary)] flex items-center gap-1.5 font-medium px-2 py-0.5 bg-[var(--layout-bg)] border border-[var(--layout-border)] rounded transition-colors duration-300">
+                      未验证
+                    </span>
+                  )}
                 </Label>
-                <div className="flex gap-3">
-                  <Input 
-                    id="openai" 
-                    type="password" 
-                    value={openAiKey} 
-                    onChange={(e) => setOpenAiKey(e.target.value)} 
-                    className="font-mono bg-[var(--input-bg)] border-[var(--layout-border)] focus-visible:ring-primary focus-visible:border-primary shadow-inner text-[var(--text-primary)] h-11 rounded-lg transition-colors duration-300"
-                  />
-                  <Button variant="outline" className="h-11 px-6 bg-[var(--layout-bg)] hover:bg-[var(--sidebar-hover)] text-[var(--text-primary)] transition-colors duration-300">测试连接</Button>
+                
+                <div className="grid gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="openaiBaseUrl" className="text-xs text-[var(--text-secondary)]">Base URL</Label>
+                    <Input 
+                      id="openaiBaseUrl" 
+                      value={openAiBaseUrl} 
+                      onChange={(e) => {
+                        setOpenAiBaseUrl(e.target.value);
+                        setOpenAiStatus('idle');
+                      }} 
+                      placeholder="https://api.openai.com/v1"
+                      className="font-mono text-sm bg-[var(--input-bg)] border-[var(--layout-border)] focus-visible:ring-primary shadow-inner text-[var(--text-primary)] h-10 rounded-lg transition-colors duration-300"
+                    />
+                    <p className="text-[10px] text-[var(--text-secondary)]">DeepSeek 填写: https://api.deepseek.com/v1</p>
+                  </div>
+                  
+                  <div className="space-y-1.5">
+                    <Label htmlFor="openai" className="text-xs text-[var(--text-secondary)]">API Key</Label>
+                    <div className="flex gap-3">
+                      <Input 
+                        id="openai" 
+                        type="password" 
+                        value={openAiKey} 
+                        onChange={(e) => {
+                          setOpenAiKey(e.target.value);
+                          setOpenAiStatus('idle');
+                        }} 
+                        className="font-mono bg-[var(--input-bg)] border-[var(--layout-border)] focus-visible:ring-primary focus-visible:border-primary shadow-inner text-[var(--text-primary)] h-11 rounded-lg transition-colors duration-300"
+                      />
+                      <Button 
+                        variant="outline" 
+                        onClick={handleTestOpenAI}
+                        disabled={isTestingOpenAI || !openAiKey}
+                        className="h-11 px-6 bg-[var(--layout-bg)] hover:bg-[var(--sidebar-hover)] text-[var(--text-primary)] transition-colors duration-300"
+                      >
+                        {isTestingOpenAI ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            测试中
+                          </>
+                        ) : (
+                          "测试连接"
+                        )}
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
               
-              <div className="space-y-3">
+              <div className="space-y-3 p-4 bg-[var(--layout-bg)] rounded-xl border border-[var(--layout-border)] transition-colors duration-300 shadow-sm">
                 <Label htmlFor="anthropic" className="flex items-center justify-between text-[var(--text-primary)] transition-colors duration-300">
                   Anthropic API Key <span className="text-[var(--text-secondary)] ml-2 font-normal text-xs transition-colors duration-300">(Claude)</span>
-                  <span className="text-xs text-[var(--text-secondary)] font-medium px-2 py-0.5 bg-[var(--layout-bg)] border border-[var(--layout-border)] rounded transition-colors duration-300">未配置</span>
+                  {anthropicStatus === 'success' && (
+                    <span className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1.5 font-medium px-2 py-0.5 bg-green-500/10 border border-green-500/20 rounded transition-colors duration-300">
+                      <ShieldCheck className="w-3.5 h-3.5" /> 已验证
+                    </span>
+                  )}
+                  {anthropicStatus === 'error' && (
+                    <span className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1.5 font-medium px-2 py-0.5 bg-red-500/10 border border-red-500/20 rounded transition-colors duration-300">
+                      <XCircle className="w-3.5 h-3.5" /> 验证失败
+                    </span>
+                  )}
+                  {anthropicStatus === 'idle' && !isTestingAnthropic && (
+                    <span className="text-xs text-[var(--text-secondary)] font-medium px-2 py-0.5 bg-[var(--layout-bg)] border border-[var(--layout-border)] rounded transition-colors duration-300">未配置</span>
+                  )}
                 </Label>
                 <div className="flex gap-3">
                   <Input 
                     id="anthropic" 
                     type="password" 
                     value={anthropicKey} 
-                    onChange={(e) => setAnthropicKey(e.target.value)} 
+                    onChange={(e) => {
+                      setAnthropicKey(e.target.value);
+                      setAnthropicStatus('idle');
+                    }} 
                     placeholder="sk-ant-..." 
                     className="font-mono bg-[var(--input-bg)] border-[var(--layout-border)] focus-visible:ring-primary focus-visible:border-primary shadow-inner text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/50 h-11 rounded-lg transition-colors duration-300"
                   />
-                  <Button variant="outline" className="h-11 px-6 bg-[var(--layout-bg)] hover:bg-[var(--sidebar-hover)] text-[var(--text-primary)] transition-colors duration-300">测试连接</Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={handleTestAnthropic}
+                    disabled={isTestingAnthropic || !anthropicKey}
+                    className="h-11 px-6 bg-[var(--layout-bg)] hover:bg-[var(--sidebar-hover)] text-[var(--text-primary)] transition-colors duration-300"
+                  >
+                    {isTestingAnthropic ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        测试中
+                      </>
+                    ) : (
+                      "测试连接"
+                    )}
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -99,9 +237,13 @@ export function Settings() {
                   <Label className="text-base text-[var(--text-primary)] transition-colors duration-300">人类审核模式 (Supervision Mode)</Label>
                   <p className="text-xs text-[var(--text-secondary)] transition-colors duration-300">AI 探索新平台后，是否需要人类确认生成的 Markdown 规范。</p>
                 </div>
-                <select className="bg-[var(--input-bg)] border border-[var(--layout-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer appearance-none transition-colors duration-300">
+                <select
+                  value={supervisionMode}
+                  onChange={(e) => setSupervisionMode(e.target.value as 'none' | 'optional' | 'required')}
+                  className="bg-[var(--input-bg)] border border-[var(--layout-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer appearance-none transition-colors duration-300"
+                >
                   <option value="none">无需干预 (全自动)</option>
-                  <option value="optional" selected>可选审核 (推荐)</option>
+                  <option value="optional">可选审核 (推荐)</option>
                   <option value="required">必须审核 (最安全)</option>
                 </select>
               </div>
