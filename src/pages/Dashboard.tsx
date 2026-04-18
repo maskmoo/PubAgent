@@ -1,21 +1,48 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Activity, CheckCircle2, XCircle, Clock, Zap, Sparkles } from "lucide-react";
+import { Activity, CheckCircle2, XCircle, Clock, Zap, Sparkles, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
-const stats = [
-  { label: "今日发布任务", value: "12", icon: Activity, color: "text-blue-400" },
-  { label: "成功发布", value: "10", icon: CheckCircle2, color: "text-green-400" },
-  { label: "待执行", value: "2", icon: Clock, color: "text-yellow-400" },
-  { label: "AI修复失败", value: "0", icon: XCircle, color: "text-red-400" },
-];
-
-const recentTasks = [
-  { id: 1, title: "Next.js 15 全新特性解析", platform: "知乎", status: "success", time: "10 分钟前", aiFixed: false },
-  { id: 2, title: "React 19 Server Components 指南", platform: "掘金", status: "success", time: "1 小时前", aiFixed: true },
-  { id: 3, title: "如何用 AI 探索新平台发布", platform: "CSDN", status: "pending", time: "排期: 18:00", aiFixed: false },
+const defaultStats = [
+  { label: "总创建任务", value: "-", icon: Activity, color: "text-blue-400" },
+  { label: "成功发布", value: "-", icon: CheckCircle2, color: "text-green-400" },
+  { label: "待执行", value: "-", icon: Clock, color: "text-yellow-400" },
+  { label: "AI修复失败", value: "-", icon: XCircle, color: "text-red-400" },
 ];
 
 export function Dashboard() {
+  const [stats, setStats] = useState(defaultStats);
+  const [recentTasks, setRecentTasks] = useState<any[]>([]);
+  const [goldenTimes, setGoldenTimes] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const response = await fetch('/api/dashboard');
+        const data = await response.json();
+        
+        if (data.success) {
+          // Merge API stats values with our defaultStats to keep the icons/colors
+          const newStats = defaultStats.map(s => {
+            const apiStat = data.stats.find((as: any) => as.label === s.label);
+            return apiStat ? { ...s, value: apiStat.value } : s;
+          });
+          
+          setStats(newStats);
+          setRecentTasks(data.recentTasks);
+          setGoldenTimes(data.goldenTimes);
+        }
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
   return (
     <div className="space-y-8">
       <div>
@@ -54,7 +81,10 @@ export function Dashboard() {
         <Card className="lg:col-span-4 border-[var(--layout-border)] bg-[var(--card-bg)] relative overflow-hidden shadow-sm">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
           <CardHeader>
-            <CardTitle className="text-lg text-[var(--text-primary)] transition-colors duration-300">近期分发任务</CardTitle>
+            <CardTitle className="text-lg text-[var(--text-primary)] transition-colors duration-300 flex items-center gap-2">
+              近期分发任务
+              {isLoading && <Loader2 className="w-4 h-4 animate-spin text-primary" />}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -107,7 +137,7 @@ export function Dashboard() {
           <CardContent className="space-y-5 relative z-10">
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed transition-colors duration-300">根据您的粉丝画像和历史数据，AI 代理计算出各平台最佳发布时间：</p>
             <ul className="space-y-3">
-              {[{ name: "知乎", time: "18:30 - 20:00" }, { name: "掘金", time: "09:00 - 10:30" }, { name: "CSDN", time: "14:00 - 16:00" }].map(platform => (
+              {goldenTimes.map((platform: any) => (
                 <li key={platform.name} className="flex justify-between items-center bg-[var(--layout-bg)] border border-[var(--layout-border)] p-3 rounded-lg backdrop-blur-md transition-colors duration-300">
                   <span className="font-medium text-xs text-[var(--text-primary)] transition-colors duration-300">{platform.name}</span>
                   <span className="text-primary font-mono font-bold text-sm tracking-tight">{platform.time}</span>
