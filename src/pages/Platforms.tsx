@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Sparkles, CheckCircle2, Globe, ArrowRight, Loader2, RefreshCw, XCircle, FileJson, Play } from "lucide-react";
+import { Search, Sparkles, CheckCircle2, Globe, ArrowRight, Loader2, RefreshCw, XCircle, FileJson, Play, LogIn } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Dialog,
@@ -100,6 +100,11 @@ export function Platforms() {
       id: platform.id
     });
     setWorkflowDialogOpen(true);
+  };
+
+  const handleLoginRedirect = (url: string) => {
+    // Navigate to the platform in a new tab
+    window.open(`https://${url}`, '_blank');
   };
 
   return (
@@ -219,6 +224,18 @@ export function Platforms() {
                     <Button 
                       variant="ghost" 
                       size="icon" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLoginRedirect(platform.url);
+                      }}
+                      className="w-6 h-6 text-[var(--text-secondary)] hover:text-primary hover:bg-[var(--layout-bg)]"
+                      title={`前往 ${platform.name} 登录`}
+                    >
+                      <LogIn className="w-3 h-3" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
                       onClick={(e) => openWorkflowDialog(e, platform)}
                       className="w-6 h-6 text-[var(--text-secondary)] hover:text-primary hover:bg-[var(--layout-bg)]"
                       title="查看自动化工作流"
@@ -298,6 +315,18 @@ export function Platforms() {
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl" />
                 <CardContent className="p-4 flex flex-col items-center text-center space-y-3 relative z-10">
                   <div className="absolute top-2 right-2 flex gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLoginRedirect(discoveredPlatform);
+                      }}
+                      className="w-6 h-6 text-primary/70 hover:text-primary hover:bg-primary/10"
+                      title={`前往 ${discoveredPlatform} 登录`}
+                    >
+                      <LogIn className="w-3 h-3" />
+                    </Button>
                     <Button 
                       variant="ghost" 
                       size="icon" 
