@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Save, Key, Cpu, ShieldCheck, Loader2, XCircle, CheckCircle2 } from "lucide-react";
+import { Save, Key, Cpu, ShieldCheck, Loader2, XCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSettingsStore } from "@/store/useSettingsStore";
 
@@ -37,7 +37,7 @@ export function Settings() {
       } else {
         setOpenAiStatus('error');
       }
-    } catch (error) {
+    } catch {
       setOpenAiStatus('error');
     } finally {
       setIsTestingOpenAI(false);
@@ -60,7 +60,7 @@ export function Settings() {
       } else {
         setAnthropicStatus('error');
       }
-    } catch (error) {
+    } catch {
       setAnthropicStatus('error');
     } finally {
       setIsTestingAnthropic(false);

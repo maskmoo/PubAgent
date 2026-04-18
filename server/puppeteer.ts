@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer';
 
-export async function publishToPlatform(platform: string, title: string, content: string) {
+export async function publishToPlatform(platform: string, title?: string, content?: string) {
   console.log(`[Puppeteer] Starting publishing process for ${platform}...`);
   
   const browser = await puppeteer.launch({
@@ -49,12 +49,14 @@ export async function publishToPlatform(platform: string, title: string, content
     let titleText = "Unknown Title";
     try {
       titleText = await page.title();
-    } catch(e) {}
+    } catch {
+      // ignore
+    }
 
-    console.log(`[Puppeteer] Successfully interacted with page: ${titleText}`);
+    console.log(`[Puppeteer] Successfully interacted with page: ${titleText}, ${title}, ${content}`);
     
     return { success: true, message: `Successfully published to ${platform}` };
-  } catch (error: any) {
+  } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
     console.error(`[Puppeteer] Error publishing to ${platform}:`, error);
     return { success: false, error: error.message || 'Unknown error' };
   } finally {

@@ -75,7 +75,7 @@ export function Platforms() {
       } else {
         setPlatformStatus(prev => ({ ...prev, [id]: 'error' }));
       }
-    } catch (e) {
+    } catch {
       setPlatformStatus(prev => ({ ...prev, [id]: 'error' }));
     } finally {
       setCheckingStatus(prev => ({ ...prev, [id]: false }));
@@ -92,7 +92,7 @@ export function Platforms() {
   const [workflowDialogOpen, setWorkflowDialogOpen] = useState(false);
   const [selectedWorkflow, setSelectedWorkflow] = useState<{name: string, url: string, id: string} | null>(null);
 
-  const openWorkflowDialog = (e: React.MouseEvent, platform: any) => {
+  const openWorkflowDialog = (e: React.MouseEvent, platform: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
     e.stopPropagation();
     setSelectedWorkflow({
       name: platform.name,

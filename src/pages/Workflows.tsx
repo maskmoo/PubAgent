@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Terminal, ShieldAlert, FileText, CheckCircle2, History, RotateCcw, AlertTriangle, ArrowRight } from "lucide-react";
+import { Terminal, ShieldAlert, FileText, CheckCircle2, History, RotateCcw, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 const mockWorkflowSpec = `### Platform Information

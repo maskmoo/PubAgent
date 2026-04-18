@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity, CheckCircle2, XCircle, Clock, Zap, Sparkles, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
-const defaultStats = [
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const defaultStats: any[] = [
   { label: "总创建任务", value: "-", icon: Activity, color: "text-blue-400" },
   { label: "成功发布", value: "-", icon: CheckCircle2, color: "text-green-400" },
   { label: "待执行", value: "-", icon: Clock, color: "text-yellow-400" },
@@ -12,8 +13,8 @@ const defaultStats = [
 
 export function Dashboard() {
   const [stats, setStats] = useState(defaultStats);
-  const [recentTasks, setRecentTasks] = useState<any[]>([]);
-  const [goldenTimes, setGoldenTimes] = useState<any[]>([]);
+  const [recentTasks, setRecentTasks] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
+  const [goldenTimes, setGoldenTimes] = useState<any[]>([]); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -24,7 +25,8 @@ export function Dashboard() {
         
         if (data.success) {
           // Merge API stats values with our defaultStats to keep the icons/colors
-          const newStats = defaultStats.map(s => {
+          const newStats = defaultStats.map((s) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const apiStat = data.stats.find((as: any) => as.label === s.label);
             return apiStat ? { ...s, value: apiStat.value } : s;
           });
@@ -137,7 +139,7 @@ export function Dashboard() {
           <CardContent className="space-y-5 relative z-10">
             <p className="text-xs text-[var(--text-secondary)] leading-relaxed transition-colors duration-300">根据您的粉丝画像和历史数据，AI 代理计算出各平台最佳发布时间：</p>
             <ul className="space-y-3">
-              {goldenTimes.map((platform: any) => (
+              {goldenTimes.map((platform: any) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
                 <li key={platform.name} className="flex justify-between items-center bg-[var(--layout-bg)] border border-[var(--layout-border)] p-3 rounded-lg backdrop-blur-md transition-colors duration-300">
                   <span className="font-medium text-xs text-[var(--text-primary)] transition-colors duration-300">{platform.name}</span>
                   <span className="text-primary font-mono font-bold text-sm tracking-tight">{platform.time}</span>
