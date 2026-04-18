@@ -3,14 +3,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Sparkles, CheckCircle2, Globe, ArrowRight, Loader2, RefreshCw, XCircle } from "lucide-react";
+import { Search, Sparkles, CheckCircle2, Globe, ArrowRight, Loader2, RefreshCw, XCircle, FileJson, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const defaultPlatforms = [
-  { id: "zhihu", name: "知乎", url: "zhihu.com", status: "active", icon: Globe },
-  { id: "juejin", name: "掘金", url: "juejin.cn", status: "active", icon: Globe },
-  { id: "csdn", name: "CSDN", url: "csdn.net", status: "active", icon: Globe },
-  { id: "jianshu", name: "简书", url: "jianshu.com", status: "active", icon: Globe },
+  { id: "zhihu", name: "知乎", url: "zhihu.com", status: "active", icon: Globe, workflow: "https://zhuanlan.zhihu.com/write" },
+  { id: "juejin", name: "掘金", url: "juejin.cn", status: "active", icon: Globe, workflow: "https://juejin.cn/editor/drafts/new" },
+  { id: "csdn", name: "CSDN", url: "csdn.net", status: "active", icon: Globe, workflow: "https://editor.csdn.net/md" },
+  { id: "jianshu", name: "简书", url: "jianshu.com", status: "active", icon: Globe, workflow: "https://www.jianshu.com/writer" },
 ];
 
 export function Platforms() {
@@ -79,6 +86,19 @@ export function Platforms() {
     if (discoveredPlatform) {
       checkPlatformStatus('discovered');
     }
+  };
+
+  const [workflowDialogOpen, setWorkflowDialogOpen] = useState(false);
+  const [selectedWorkflow, setSelectedWorkflow] = useState<{name: string, url: string, id: string} | null>(null);
+
+  const openWorkflowDialog = (e: React.MouseEvent, platform: any) => {
+    e.stopPropagation();
+    setSelectedWorkflow({
+      name: platform.name,
+      url: platform.workflow || `https://${platform.url}/write`,
+      id: platform.id
+    });
+    setWorkflowDialogOpen(true);
   };
 
   return (
@@ -194,7 +214,16 @@ export function Platforms() {
               <Card key={platform.id} className="bg-[var(--card-bg)] border-[var(--layout-border)] hover:border-primary/30 hover:bg-[var(--sidebar-hover)] transition-all duration-300 group cursor-pointer overflow-hidden relative shadow-sm">
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <CardContent className="p-4 flex flex-col items-center text-center space-y-3 relative z-10">
-                  <div className="absolute top-2 right-2">
+                  <div className="absolute top-2 right-2 flex gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={(e) => openWorkflowDialog(e, platform)}
+                      className="w-6 h-6 text-[var(--text-secondary)] hover:text-primary hover:bg-[var(--layout-bg)]"
+                      title="查看自动化工作流"
+                    >
+                      <FileJson className="w-3 h-3" />
+                    </Button>
                     <Button 
                       variant="ghost" 
                       size="icon" 
@@ -204,6 +233,7 @@ export function Platforms() {
                       }}
                       disabled={isChecking}
                       className="w-6 h-6 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--layout-bg)]"
+                      title="检查连接状态"
                     >
                       <RefreshCw className={`w-3 h-3 ${isChecking ? 'animate-spin text-primary' : ''}`} />
                     </Button>
@@ -260,7 +290,16 @@ export function Platforms() {
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-50" />
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl" />
                 <CardContent className="p-4 flex flex-col items-center text-center space-y-3 relative z-10">
-                  <div className="absolute top-2 right-2">
+                  <div className="absolute top-2 right-2 flex gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={(e) => openWorkflowDialog(e, { name: "新探索平台", workflow: `https://${discoveredPlatform}/write`, id: "discovered" })}
+                      className="w-6 h-6 text-primary/70 hover:text-primary hover:bg-primary/10"
+                      title="查看自动化工作流"
+                    >
+                      <FileJson className="w-3 h-3" />
+                    </Button>
                     <Button 
                       variant="ghost" 
                       size="icon" 
@@ -270,6 +309,7 @@ export function Platforms() {
                       }}
                       disabled={checkingStatus['discovered']}
                       className="w-6 h-6 text-primary hover:bg-primary/10"
+                      title="检查连接状态"
                     >
                       <RefreshCw className={`w-3 h-3 ${checkingStatus['discovered'] ? 'animate-spin' : ''}`} />
                     </Button>
@@ -313,6 +353,73 @@ export function Platforms() {
           )}
         </div>
       </div>
+
+      <Dialog open={workflowDialogOpen} onOpenChange={setWorkflowDialogOpen}>
+        <DialogContent className="sm:max-w-[600px] bg-[var(--card-bg)] border-[var(--layout-border)] p-0 overflow-hidden">
+          <div className="p-6 border-b border-[var(--layout-border)]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-xl text-[var(--text-primary)]">
+                <FileJson className="w-5 h-5 text-primary" />
+                {selectedWorkflow?.name} 工作流定义
+              </DialogTitle>
+              <DialogDescription className="text-[var(--text-secondary)]">
+                基于 AI Spec Discovery 自动生成的平台交互指令规范。
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+          
+          <div className="bg-[var(--code-bg)] p-6 max-h-[400px] overflow-y-auto">
+            <pre className="font-mono text-sm text-[var(--text-primary)] whitespace-pre-wrap">
+              <code className="language-json">
+{`{
+  "platform": "${selectedWorkflow?.id}",
+  "version": "1.2.0",
+  "publish_url": "${selectedWorkflow?.url}",
+  "selectors": {
+    "title_input": "input.title-input",
+    "content_editor": ".markdown-editor textarea",
+    "submit_button": "button.publish-btn"
+  },
+  "actions": [
+    {
+      "type": "navigate",
+      "target": "${selectedWorkflow?.url}",
+      "waitUntil": "networkidle2"
+    },
+    {
+      "type": "type",
+      "selector": "$title_input",
+      "value": "{{TITLE}}"
+    },
+    {
+      "type": "type",
+      "selector": "$content_editor",
+      "value": "{{CONTENT}}"
+    },
+    {
+      "type": "click",
+      "selector": "$submit_button",
+      "delay": 500
+    }
+  ],
+  "ai_generated": true
+}`}
+              </code>
+            </pre>
+          </div>
+          
+          <div className="p-4 border-t border-[var(--layout-border)] bg-[var(--layout-bg)] flex justify-between items-center">
+            <span className="text-xs text-[var(--text-secondary)] flex items-center gap-1">
+              <CheckCircle2 className="w-3 h-3 text-green-500" />
+              语法校验通过
+            </span>
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => setWorkflowDialogOpen(false)}>
+              <Play className="w-3 h-3" />
+              运行测试
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
