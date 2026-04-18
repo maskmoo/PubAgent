@@ -3,10 +3,10 @@ import { Activity, CheckCircle2, XCircle, Clock, Zap, Sparkles } from "lucide-re
 import { motion } from "framer-motion";
 
 const stats = [
-  { label: "今日发布任务", value: "12", icon: Activity, color: "text-blue-500" },
-  { label: "成功发布", value: "10", icon: CheckCircle2, color: "text-green-500" },
-  { label: "待执行", value: "2", icon: Clock, color: "text-yellow-500" },
-  { label: "AI修复失败", value: "0", icon: XCircle, color: "text-red-500" },
+  { label: "今日发布任务", value: "12", icon: Activity, color: "text-blue-400" },
+  { label: "成功发布", value: "10", icon: CheckCircle2, color: "text-green-400" },
+  { label: "待执行", value: "2", icon: Clock, color: "text-yellow-400" },
+  { label: "AI修复失败", value: "0", icon: XCircle, color: "text-red-400" },
 ];
 
 const recentTasks = [
@@ -19,8 +19,8 @@ export function Dashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">控制台</h1>
-        <p className="text-muted-foreground mt-2">欢迎回来，创作者。AI 代理正在为您处理分发任务。</p>
+        <h1 className="text-3xl font-bold tracking-tight text-white">控制台</h1>
+        <p className="text-muted-foreground mt-2 text-sm">欢迎回来，创作者。AI 代理正在为您处理分发任务。</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -31,16 +31,19 @@ export function Dashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
           >
-            <Card className="bg-card/50 backdrop-blur-sm border-border/40 overflow-hidden relative group">
-              <div className={`absolute inset-0 bg-gradient-to-br from-background to-${stat.color.split('-')[1]}-500/5 opacity-0 group-hover:opacity-100 transition-opacity`} />
-              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+            <Card className="relative overflow-hidden group border-white/[0.05] bg-white/[0.01]">
+              <div className={`absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/[0.02] rounded-full blur-3xl -mr-10 -mt-10" />
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0 relative z-10">
+                <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                   {stat.label}
                 </CardTitle>
-                <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                <div className={`p-2 rounded-md bg-white/[0.03] border border-white/[0.05] ${stat.color}`}>
+                  <stat.icon className="h-4 w-4" />
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">{stat.value}</div>
+              <CardContent className="relative z-10">
+                <div className="text-4xl font-bold text-white tracking-tight">{stat.value}</div>
               </CardContent>
             </Card>
           </motion.div>
@@ -48,26 +51,27 @@ export function Dashboard() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="lg:col-span-4 bg-card/50 backdrop-blur-sm border-border/40">
+        <Card className="lg:col-span-4 border-white/[0.05] bg-white/[0.01] relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
           <CardHeader>
-            <CardTitle>近期分发任务</CardTitle>
+            <CardTitle className="text-lg text-white">近期分发任务</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
+            <div className="space-y-4">
               {recentTasks.map((task) => (
-                <div key={task.id} className="flex items-center">
-                  <div className="flex flex-col space-y-1 w-full">
+                <div key={task.id} className="flex items-center group p-3 rounded-lg hover:bg-white/[0.02] border border-transparent hover:border-white/[0.05] transition-all">
+                  <div className="flex flex-col space-y-1.5 w-full">
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold text-sm">{task.title}</span>
-                      <span className="text-xs text-muted-foreground">{task.time}</span>
+                      <span className="font-medium text-sm text-white group-hover:text-primary transition-colors">{task.title}</span>
+                      <span className="text-[11px] text-muted-foreground font-mono">{task.time}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium px-2 py-1 bg-secondary rounded-md">
+                        <span className="text-[10px] font-semibold px-2 py-0.5 bg-white/[0.05] text-white/70 rounded border border-white/[0.05]">
                           {task.platform}
                         </span>
                         {task.aiFixed && (
-                          <span className="text-xs font-medium px-2 py-1 bg-primary/20 text-primary flex items-center gap-1 rounded-md">
+                          <span className="text-[10px] font-semibold px-2 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded flex items-center gap-1 shadow-[0_0_10px_rgba(124,58,237,0.1)]">
                             <Zap className="w-3 h-3" />
                             AI修复成功
                           </span>
@@ -75,9 +79,9 @@ export function Dashboard() {
                       </div>
                       <div className="flex items-center">
                         {task.status === 'success' ? (
-                          <span className="flex h-2 w-2 rounded-full bg-green-500" />
+                          <span className="flex h-2 w-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
                         ) : (
-                          <span className="flex h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
+                          <span className="flex h-2 w-2 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.6)] animate-pulse" />
                         )}
                       </div>
                     </div>
@@ -88,31 +92,27 @@ export function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-3 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 border-purple-500/20 relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-10">
+        <Card className="lg:col-span-3 border-primary/20 bg-primary/[0.02] relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-50" />
+          <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-primary/20 rounded-full blur-[80px] pointer-events-none group-hover:bg-primary/30 transition-all duration-700" />
+          <div className="absolute bottom-4 right-4 opacity-[0.03] text-primary">
             <Zap className="w-32 h-32" />
           </div>
           <CardHeader>
-            <CardTitle className="text-primary flex items-center gap-2">
+            <CardTitle className="text-primary flex items-center gap-2 text-lg">
               <Sparkles className="w-5 h-5" />
               AI 黄金时间建议
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 relative z-10">
-            <p className="text-sm text-muted-foreground">根据您的粉丝画像和历史数据，AI 代理计算出各平台最佳发布时间：</p>
+          <CardContent className="space-y-5 relative z-10">
+            <p className="text-xs text-muted-foreground leading-relaxed">根据您的粉丝画像和历史数据，AI 代理计算出各平台最佳发布时间：</p>
             <ul className="space-y-3">
-              <li className="flex justify-between items-center bg-background/50 p-3 rounded-lg backdrop-blur-md">
-                <span className="font-medium text-sm">知乎</span>
-                <span className="text-primary font-mono font-bold">18:30 - 20:00</span>
-              </li>
-              <li className="flex justify-between items-center bg-background/50 p-3 rounded-lg backdrop-blur-md">
-                <span className="font-medium text-sm">掘金</span>
-                <span className="text-primary font-mono font-bold">09:00 - 10:30</span>
-              </li>
-              <li className="flex justify-between items-center bg-background/50 p-3 rounded-lg backdrop-blur-md">
-                <span className="font-medium text-sm">CSDN</span>
-                <span className="text-primary font-mono font-bold">14:00 - 16:00</span>
-              </li>
+              {[{ name: "知乎", time: "18:30 - 20:00" }, { name: "掘金", time: "09:00 - 10:30" }, { name: "CSDN", time: "14:00 - 16:00" }].map(platform => (
+                <li key={platform.name} className="flex justify-between items-center bg-black/40 border border-white/[0.05] p-3 rounded-lg backdrop-blur-md">
+                  <span className="font-medium text-xs text-white/80">{platform.name}</span>
+                  <span className="text-primary font-mono font-bold text-sm tracking-tight">{platform.time}</span>
+                </li>
+              ))}
             </ul>
           </CardContent>
         </Card>

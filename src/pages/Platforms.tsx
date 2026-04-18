@@ -34,33 +34,36 @@ export function Platforms() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">平台与探索</h1>
-        <p className="text-muted-foreground mt-2">管理已有平台，或通过 AI Spec Discovery 自动适配全新平台。</p>
+        <h1 className="text-3xl font-bold tracking-tight text-white">平台与探索</h1>
+        <p className="text-muted-foreground mt-2 text-sm">管理已有平台，或通过 AI Spec Discovery 自动适配全新平台。</p>
       </div>
 
       {/* AI Discovery Section */}
-      <Card className="bg-gradient-to-r from-primary/10 via-pink-500/10 to-indigo-500/10 border-primary/20 overflow-hidden relative">
-        <div className="absolute top-0 right-0 -mr-10 -mt-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl text-primary">
-            <Sparkles className="w-6 h-6" />
-            AI 探索新平台 (AI Spec Discovery)
+      <Card className="bg-primary/[0.02] border-primary/20 overflow-hidden relative group">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-50" />
+        <div className="absolute top-[-50px] right-[-50px] w-64 h-64 bg-primary/20 rounded-full blur-[80px] pointer-events-none group-hover:bg-primary/30 transition-all duration-700" />
+        <CardHeader className="relative z-10">
+          <CardTitle className="flex items-center gap-2 text-xl text-white">
+            <div className="p-2 rounded-lg bg-primary/20 border border-primary/30 shadow-[0_0_15px_rgba(124,58,237,0.2)]">
+              <Sparkles className="w-5 h-5 text-primary" />
+            </div>
+            AI 探索新平台 <span className="text-muted-foreground text-sm font-normal font-mono ml-2">(AI Spec Discovery)</span>
           </CardTitle>
-          <CardDescription className="text-foreground/80">
+          <CardDescription className="text-white/60 mt-2 text-sm">
             无需写代码！只需提供发布页面的 URL，AI 将利用视觉技术自动“看懂”结构并生成工作流。
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative z-10">
           <div className="flex flex-col sm:flex-row gap-4 items-center">
-            <div className="relative flex-1 w-full group">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-primary/50 group-focus-within:text-primary transition-colors" />
+            <div className="relative flex-1 w-full group/input">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-white/30 group-focus-within/input:text-primary transition-colors" />
               </div>
               <Input 
                 value={newUrl}
                 onChange={(e) => setNewUrl(e.target.value)}
                 placeholder="https://v2ex.com/write..." 
-                className="pl-10 h-12 bg-background/50 backdrop-blur-sm border-primary/30 focus-visible:ring-primary shadow-inner"
+                className="pl-12 h-14 bg-black/40 backdrop-blur-xl border-white/[0.1] focus-visible:ring-primary focus-visible:border-primary shadow-inner text-white placeholder:text-white/20 rounded-xl transition-all"
               />
             </div>
             <Button 
@@ -68,7 +71,7 @@ export function Platforms() {
               variant="sparkle" 
               onClick={handleDiscovery} 
               disabled={isDiscovering || !newUrl}
-              className="w-full sm:w-auto min-w-[140px]"
+              className="w-full sm:w-auto min-w-[140px] h-14 rounded-xl text-sm font-bold"
             >
               {isDiscovering ? (
                 <>
@@ -87,21 +90,23 @@ export function Platforms() {
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-6 p-4 rounded-lg bg-green-500/10 border border-green-500/20 flex items-start gap-4"
+              className="mt-6 p-5 rounded-xl bg-green-500/10 border border-green-500/20 flex items-start gap-4 backdrop-blur-md shadow-[0_0_30px_rgba(34,197,94,0.1)]"
             >
-              <CheckCircle2 className="w-6 h-6 text-green-500 flex-shrink-0 mt-0.5" />
+              <div className="p-2 bg-green-500/20 rounded-full border border-green-500/30 flex-shrink-0 mt-0.5 shadow-[0_0_15px_rgba(34,197,94,0.2)]">
+                <CheckCircle2 className="w-5 h-5 text-green-400" />
+              </div>
               <div>
-                <h4 className="font-bold text-green-500">探索成功！</h4>
-                <p className="text-sm text-green-600/80 mt-1">
-                  AI 已成功识别 {discoveredPlatform} 的输入框、编辑器和发布按钮。
+                <h4 className="font-bold text-green-400 text-lg">探索成功！</h4>
+                <p className="text-sm text-green-400/80 mt-2 leading-relaxed">
+                  AI 已成功识别 <span className="font-mono bg-black/30 px-1.5 py-0.5 rounded border border-green-500/20">{discoveredPlatform}</span> 的输入框、编辑器和发布按钮。
                   <br/>
-                  规范文件已自动生成并保存至 `docs/workflow/` 目录。
+                  规范文件已自动生成并保存至 <span className="font-mono text-green-300/80">docs/workflow/</span> 目录。
                 </p>
-                <div className="mt-3 flex gap-2">
-                  <Badge variant="outline" className="bg-green-500/20 text-green-600 border-green-500/30">
+                <div className="mt-4 flex gap-3">
+                  <Badge variant="outline" className="bg-green-500/20 text-green-300 border-green-500/30 shadow-[0_0_10px_rgba(34,197,94,0.1)] px-3 py-1">
                     置信度: 98%
                   </Badge>
-                  <Badge variant="outline" className="bg-green-500/20 text-green-600 border-green-500/30">
+                  <Badge variant="outline" className="bg-green-500/20 text-green-300 border-green-500/30 shadow-[0_0_10px_rgba(34,197,94,0.1)] px-3 py-1">
                     无需人工干预
                   </Badge>
                 </div>
@@ -113,23 +118,26 @@ export function Platforms() {
 
       {/* Available Platforms Grid */}
       <div>
-        <h3 className="text-lg font-medium mb-4 flex items-center gap-2">
-          <Globe className="w-5 h-5 text-muted-foreground" />
+        <h3 className="text-lg font-medium mb-6 flex items-center gap-2 text-white">
+          <div className="p-1.5 bg-white/[0.05] rounded-md border border-white/[0.1]">
+            <Globe className="w-4 h-4 text-muted-foreground" />
+          </div>
           已适配平台
         </h3>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {defaultPlatforms.map((platform) => (
-            <Card key={platform.id} className="bg-card/50 backdrop-blur-sm border-border/40 hover:border-primary/50 transition-colors group cursor-pointer">
-              <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
-                <div className="w-16 h-16 rounded-2xl bg-secondary flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm">
-                  <platform.icon className="w-8 h-8 text-primary" />
+            <Card key={platform.id} className="bg-white/[0.01] border-white/[0.05] hover:border-white/[0.1] hover:bg-white/[0.02] transition-all duration-300 group cursor-pointer overflow-hidden relative">
+              <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <CardContent className="p-6 flex flex-col items-center text-center space-y-5 relative z-10">
+                <div className="w-16 h-16 rounded-2xl bg-black/40 border border-white/[0.05] flex items-center justify-center group-hover:scale-110 group-hover:border-primary/30 transition-all duration-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+                  <platform.icon className="w-7 h-7 text-white/50 group-hover:text-primary transition-colors duration-500" />
                 </div>
                 <div>
-                  <h4 className="font-bold text-lg">{platform.name}</h4>
-                  <p className="text-xs text-muted-foreground font-mono mt-1">{platform.url}</p>
+                  <h4 className="font-bold text-lg text-white group-hover:text-primary transition-colors">{platform.name}</h4>
+                  <p className="text-xs text-white/40 font-mono mt-1.5 bg-black/30 px-2 py-0.5 rounded-md border border-white/[0.05] inline-block">{platform.url}</p>
                 </div>
-                <Badge variant="success" className="px-3">
-                  <CheckCircle2 className="w-3 h-3 mr-1" />
+                <Badge variant="outline" className="px-3 bg-green-500/10 text-green-400 border-green-500/20 shadow-[0_0_10px_rgba(34,197,94,0.05)]">
+                  <CheckCircle2 className="w-3 h-3 mr-1.5" />
                   账号已连接
                 </Badge>
               </CardContent>
@@ -138,19 +146,20 @@ export function Platforms() {
           
           {/* Add discovered platform dynamically */}
           {discoveredPlatform && (
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-              <Card className="bg-card/50 backdrop-blur-sm border-primary shadow-[0_0_15px_-3px_rgba(124,58,237,0.3)] group cursor-pointer">
-                <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
-                  <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500 to-purple-500 opacity-20" />
-                    <Sparkles className="w-8 h-8 text-primary" />
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+              <Card className="bg-primary/[0.02] border-primary/30 shadow-[0_0_20px_-5px_rgba(124,58,237,0.3)] group cursor-pointer relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-50" />
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl" />
+                <CardContent className="p-6 flex flex-col items-center text-center space-y-5 relative z-10">
+                  <div className="w-16 h-16 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-[0_0_15px_rgba(124,58,237,0.2)]">
+                    <Sparkles className="w-7 h-7 text-primary" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-lg">新平台</h4>
-                    <p className="text-xs text-muted-foreground font-mono mt-1 truncate max-w-[120px]">{discoveredPlatform}</p>
+                    <h4 className="font-bold text-lg text-white">新平台</h4>
+                    <p className="text-xs text-primary/70 font-mono mt-1.5 bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20 inline-block truncate max-w-[120px]">{discoveredPlatform}</p>
                   </div>
-                  <Badge variant="success" className="px-3 bg-gradient-to-r from-primary to-pink-500 text-white border-0">
-                    <Sparkles className="w-3 h-3 mr-1" />
+                  <Badge className="px-3 bg-primary text-white border-0 shadow-[0_0_15px_rgba(124,58,237,0.4)] hover:bg-primary">
+                    <Sparkles className="w-3 h-3 mr-1.5" />
                     AI 自动适配
                   </Badge>
                 </CardContent>
