@@ -3,6 +3,8 @@ import cors from 'cors';
 import { streamText, generateObject, generateText } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { z } from 'zod';
+import { db } from './db.js';
+import { publishToPlatform } from './puppeteer.js';
 
 const app = express();
 app.use(cors());
@@ -67,13 +69,60 @@ app.post('/api/generate-tags', async (req, res) => {
 });
 
 app.post('/api/publish', async (req, res) => {
-  // Mock publish endpoint
   const { type, content, platforms } = req.body;
+  const title = req.body.title || 'Untitled';
   
-  // Simulate processing time
-  await new Promise(resolve => setTimeout(resolve, 2500));
-  
-  res.json({ success: true, message: `Successfully published ${type} to ${platforms?.length || 1} platforms.` });
+  if (!platforms || platforms.length === 0) {
+    return res.status(400).json({ error: 'No platforms selected' });
+  }
+
+  try {
+    // Run puppeteer scripts in parallel for each selected platform
+    const results = await Promise.all(
+      platforms.map(async (platform: string) => {
+        try {
+          return await publishToPlatform(platform, title, content);
+        } catch (e: any) {
+          return { success: false, platform, error: e.message };
+        }
+      })
+    );
+    
+    res.json({ success: true, results, message: `Publish process finished for ${platforms.length} platforms.` });
+  } catch (error) {
+    console.error('Publish error:', error);
+    res.status(500).json({ error: 'Failed to publish' });
+  }
+});
+
+// Drafts Endpoints
+app.post('/api/drafts', (req, res) => {
+  try {
+    const { type, title, content, platforms } = req.body;
+    const stmt = db.prepare('INSERT INTO drafts (type, title, content, platforms) VALUES (?, ?, ?, ?)');
+    const result = stmt.run(type, title || '', content || '', JSON.stringify(platforms || []));
+    res.json({ success: true, id: result.lastInsertRowid });
+  } catch (error) {
+    console.error('Draft save error:', error);
+    res.status(500).json({ error: 'Failed to save draft' });
+  }
+});
+
+app.get('/api/drafts', (req, res) => {
+  try {
+    const stmt = db.prepare('SELECT * FROM drafts ORDER BY updated_at DESC');
+    const drafts = stmt.all() as any[];
+    res.json({ 
+      success: true, 
+      drafts: drafts.map(d => ({
+        ...d, 
+        platforms: JSON.parse(d.platforms)
+      })) 
+    });
+  } catch (error) {
+    console.error('Draft fetch error:', error);
+    res.status(500).json({ error: 'Failed to fetch drafts' });
+  }
 });
 
 app.post('/api/discover-platform', async (req, res) => {

@@ -46,6 +46,8 @@ export function Editor() {
   // Common publishing states
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(false);
 
   const handleOptimize = async () => {
     setIsOptimizing(true);
@@ -121,8 +123,9 @@ export function Editor() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          title: activeTab === 'article' ? title : videoTitle,
           type: activeTab,
-          content: activeTab === 'article' ? (optimizedContent || content) : videoTitle,
+          content: activeTab === 'article' ? (optimizedContent || content) : videoDesc,
           platforms
         }),
       });
@@ -134,6 +137,36 @@ export function Editor() {
       console.error(error);
     } finally {
       setIsPublishing(false);
+    }
+  };
+
+  const handleSaveDraft = async () => {
+    if (activeTab === 'article' && !title && !content) return;
+    if (activeTab === 'video' && !videoTitle && !videoDesc) return;
+
+    setIsSavingDraft(true);
+    try {
+      const platforms = activeTab === 'article' 
+        ? articlePlatforms.filter(p => p.selected).map(p => p.id)
+        : videoPlatforms.filter(p => p.selected).map(p => p.id);
+
+      await fetch("/api/drafts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: activeTab,
+          title: activeTab === 'article' ? title : videoTitle,
+          content: activeTab === 'article' ? content : videoDesc,
+          platforms
+        }),
+      });
+
+      setDraftSaved(true);
+      setTimeout(() => setDraftSaved(false), 3000);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSavingDraft(false);
     }
   };
 
@@ -151,9 +184,14 @@ export function Editor() {
           <p className="text-[var(--text-secondary)] mt-2 text-sm transition-colors duration-300">编写 Markdown 内容，AI 代理将自动为您优化和分发。</p>
         </div>
         <div className="flex gap-3 w-full sm:w-auto">
-          <Button variant="outline" className="gap-2 flex-1 sm:flex-none">
-            <Save className="w-4 h-4" />
-            保存草稿
+          <Button 
+            variant="outline" 
+            onClick={handleSaveDraft}
+            disabled={isSavingDraft || (activeTab === 'article' && !title && !content) || (activeTab === 'video' && !videoTitle && !videoDesc)}
+            className={`gap-2 flex-1 sm:flex-none transition-all duration-300 ${draftSaved ? "border-green-500 text-green-500 bg-green-500/10" : ""}`}
+          >
+            {isSavingDraft ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            {draftSaved ? "已保存" : "保存草稿"}
           </Button>
           {activeTab === "article" && (
             <Button variant="sparkle" onClick={handleOptimize} disabled={isOptimizing} className="gap-2 flex-1 sm:flex-none">
