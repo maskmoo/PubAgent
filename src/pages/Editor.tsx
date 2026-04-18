@@ -41,6 +41,10 @@ export function Editor() {
   const [isGeneratingTags, setIsGeneratingTags] = useState(false);
   const [generatedTags, setGeneratedTags] = useState<string[]>([]);
 
+  // Common publishing states
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishSuccess, setPublishSuccess] = useState(false);
+
   const handleOptimize = async () => {
     setIsOptimizing(true);
     // Simulate AI processing
@@ -58,6 +62,24 @@ export function Editor() {
       setGeneratedTags(["#科技探索", "#AI", "#提效神器", "#自媒体", "#干货分享"]);
       setIsGeneratingTags(false);
     }, 1500);
+  };
+
+  const handlePublish = () => {
+    // Basic validation
+    if (activeTab === 'article' && !title && !content) return;
+    if (activeTab === 'video' && !videoFile) return;
+
+    setIsPublishing(true);
+    setPublishSuccess(false);
+
+    // Simulate multi-platform publishing process
+    setTimeout(() => {
+      setIsPublishing(false);
+      setPublishSuccess(true);
+      
+      // Reset success state after a while
+      setTimeout(() => setPublishSuccess(false), 3000);
+    }, 2500);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,13 +100,31 @@ export function Editor() {
             <Save className="w-4 h-4" />
             保存草稿
           </Button>
-          <Button variant="sparkle" onClick={handleOptimize} disabled={isOptimizing} className="gap-2 flex-1 sm:flex-none">
-            {isOptimizing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-            AI 内容优化
-          </Button>
-          <Button className="gap-2 bg-[var(--text-primary)] text-[var(--layout-bg)] hover:opacity-90 shadow-sm flex-1 sm:flex-none transition-colors duration-300">
-            <Send className="w-4 h-4" />
-            智能发布
+          {activeTab === "article" && (
+            <Button variant="sparkle" onClick={handleOptimize} disabled={isOptimizing} className="gap-2 flex-1 sm:flex-none">
+              {isOptimizing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              AI 内容优化
+            </Button>
+          )}
+          <Button 
+            onClick={handlePublish}
+            disabled={isPublishing || (activeTab === 'article' && !title && !content) || (activeTab === 'video' && !videoFile)}
+            className={`gap-2 flex-1 sm:flex-none transition-all duration-300 ${
+              publishSuccess 
+                ? "bg-green-500 hover:bg-green-600 text-white" 
+                : "bg-[var(--text-primary)] text-[var(--layout-bg)] hover:opacity-90 shadow-sm"
+            }`}
+          >
+            {isPublishing ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : publishSuccess ? (
+              "发布成功"
+            ) : (
+              <>
+                <Send className="w-4 h-4" />
+                智能发布
+              </>
+            )}
           </Button>
         </div>
       </div>
