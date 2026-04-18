@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "PubAgent Sync",
+  "version": "1.0.0",
+  "description": "自动将当前浏览器的登录态 (Cookies) 一键同步到本地 PubAgent 平台，实现安全无感的自动化发布。",
+  "permissions": [
+    "cookies",
+    "tabs",
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*.zhihu.com/*",
+    "*://*.juejin.cn/*",
+    "*://*.csdn.net/*",
+    "*://*.jianshu.com/*",
+    "*://*.bilibili.com/*",
+    "*://*.douyin.com/*",
+    "*://*.kuaishou.com/*",
+    "*://*.xiaohongshu.com/*",
+    "http://localhost:3001/*"
+  ],
+  "action": {
+    "default_popup": "popup/index.html",
+    "default_title": "同步登录状态到 PubAgent"
+  },
+  "background": {
+    "service_worker": "scripts/background.js"
+  }
+}
