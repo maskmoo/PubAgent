@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,24 +12,77 @@ import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from "framer-motion";
 import { useSettingsStore } from "@/store/useSettingsStore";
 
-const articlePlatforms = [
-  { id: "zhihu", name: "知乎", selected: true },
-  { id: "juejin", name: "掘金", selected: false },
-  { id: "csdn", name: "CSDN", selected: false },
-  { id: "jianshu", name: "简书", selected: false },
+const initialArticlePlatforms = [
+  { id: "zhihu", name: "知乎", selected: false, connected: false },
+  { id: "juejin", name: "掘金", selected: false, connected: false },
+  { id: "csdn", name: "CSDN", selected: false, connected: false },
+  { id: "jianshu", name: "简书", selected: false, connected: false },
 ];
 
-const videoPlatforms = [
-  { id: "bilibili", name: "Bilibili", selected: true },
-  { id: "douyin", name: "抖音", selected: false },
-  { id: "kuaishou", name: "快手", selected: false },
-  { id: "xiaohongshu", name: "小红书", selected: false },
+const initialVideoPlatforms = [
+  { id: "bilibili", name: "Bilibili", selected: false, connected: false },
+  { id: "douyin", name: "抖音", selected: false, connected: false },
+  { id: "kuaishou", name: "快手", selected: false, connected: false },
+  { id: "xiaohongshu", name: "小红书", selected: false, connected: false },
 ];
 
 export function Editor() {
   const [activeTab, setActiveTab] = useState("article");
   const { openAiKey, openAiBaseUrl } = useSettingsStore();
   
+  const [articlePlatforms, setArticlePlatforms] = useState(initialArticlePlatforms);
+  const [videoPlatforms, setVideoPlatforms] = useState(initialVideoPlatforms);
+
+  useEffect(() => {
+    const fetchStatuses = async () => {
+      const checkPlatform = async (id: string) => {
+        try {
+          const res = await fetch(`/api/platforms/${id}/status`);
+          const data = await res.json();
+          return data.status === 'connected';
+        } catch {
+          return false;
+        }
+      };
+
+      const articleStatuses = await Promise.all(initialArticlePlatforms.map(p => checkPlatform(p.id)));
+      setArticlePlatforms(prev => prev.map((p, i) => ({ 
+        ...p, 
+        connected: articleStatuses[i], 
+        // Auto-select the first connected platform
+        selected: articleStatuses[i] && !prev.some(ap => ap.selected && ap.connected) ? true : (articleStatuses[i] ? p.selected : false)
+      })));
+
+      const videoStatuses = await Promise.all(initialVideoPlatforms.map(p => checkPlatform(p.id)));
+      setVideoPlatforms(prev => prev.map((p, i) => ({ 
+        ...p, 
+        connected: videoStatuses[i], 
+        selected: videoStatuses[i] && !prev.some(vp => vp.selected && vp.connected) ? true : (videoStatuses[i] ? p.selected : false)
+      })));
+    };
+    fetchStatuses();
+  }, []);
+
+  const toggleArticlePlatform = (id: string) => {
+    setArticlePlatforms(prev => prev.map(p => {
+      if (p.id === id) {
+        if (!p.connected) return p; // cannot select disconnected
+        return { ...p, selected: !p.selected };
+      }
+      return p;
+    }));
+  };
+
+  const toggleVideoPlatform = (id: string) => {
+    setVideoPlatforms(prev => prev.map(p => {
+      if (p.id === id) {
+        if (!p.connected) return p; // cannot select disconnected
+        return { ...p, selected: !p.selected };
+      }
+      return p;
+    }));
+  };
+
   // Article states
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -108,16 +161,19 @@ export function Editor() {
 
   const handlePublish = async () => {
     // Basic validation
-    if (activeTab === 'article' && !title && !content) return;
-    if (activeTab === 'video' && !videoFile) return;
+    const selectedArticlePlatforms = articlePlatforms.filter(p => p.selected);
+    const selectedVideoPlatforms = videoPlatforms.filter(p => p.selected);
+    
+    if (activeTab === 'article' && (!title && !content || selectedArticlePlatforms.length === 0)) return;
+    if (activeTab === 'video' && (!videoFile || selectedVideoPlatforms.length === 0)) return;
 
     setIsPublishing(true);
     setPublishSuccess(false);
 
     try {
       const platforms = activeTab === 'article' 
-        ? articlePlatforms.filter(p => p.selected).map(p => p.id)
-        : videoPlatforms.filter(p => p.selected).map(p => p.id);
+        ? selectedArticlePlatforms.map(p => p.id)
+        : selectedVideoPlatforms.map(p => p.id);
 
       await fetch("/api/publish", {
         method: "POST",
@@ -141,14 +197,17 @@ export function Editor() {
   };
 
   const handleSaveDraft = async () => {
+    const selectedArticlePlatforms = articlePlatforms.filter(p => p.selected);
+    const selectedVideoPlatforms = videoPlatforms.filter(p => p.selected);
+
     if (activeTab === 'article' && !title && !content) return;
     if (activeTab === 'video' && !videoTitle && !videoDesc) return;
 
     setIsSavingDraft(true);
     try {
       const platforms = activeTab === 'article' 
-        ? articlePlatforms.filter(p => p.selected).map(p => p.id)
-        : videoPlatforms.filter(p => p.selected).map(p => p.id);
+        ? selectedArticlePlatforms.map(p => p.id)
+        : selectedVideoPlatforms.map(p => p.id);
 
       await fetch("/api/drafts", {
         method: "POST",
@@ -176,6 +235,9 @@ export function Editor() {
     }
   };
 
+  const isArticleInvalid = activeTab === 'article' && (!title && !content || articlePlatforms.filter(p => p.selected).length === 0);
+  const isVideoInvalid = activeTab === 'video' && (!videoFile || videoPlatforms.filter(p => p.selected).length === 0);
+
   return (
     <div className="h-full flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -201,7 +263,7 @@ export function Editor() {
           )}
           <Button 
             onClick={handlePublish}
-            disabled={isPublishing || (activeTab === 'article' && !title && !content) || (activeTab === 'video' && !videoFile)}
+            disabled={isPublishing || isArticleInvalid || isVideoInvalid}
             className={`gap-2 flex-1 sm:flex-none transition-all duration-300 ${
               publishSuccess 
                 ? "bg-green-500 hover:bg-green-600 text-white" 
@@ -242,13 +304,17 @@ export function Editor() {
                 <Badge 
                   key={p.id} 
                   variant={p.selected ? "default" : "secondary"}
+                  onClick={() => toggleArticlePlatform(p.id)}
                   className={`cursor-pointer transition-all duration-300 px-3 py-1 ${
-                    p.selected 
-                      ? "bg-primary text-white shadow-[0_0_10px_rgba(124,58,237,0.3)] hover:bg-primary/90" 
-                      : "bg-[var(--layout-bg)] text-[var(--text-secondary)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--text-primary)] border border-[var(--layout-border)]"
+                    !p.connected 
+                      ? "opacity-50 cursor-not-allowed bg-[var(--layout-bg)] text-[var(--text-secondary)] border border-[var(--layout-border)]"
+                      : p.selected 
+                        ? "bg-primary text-white shadow-[0_0_10px_rgba(124,58,237,0.3)] hover:bg-primary/90" 
+                        : "bg-[var(--layout-bg)] text-[var(--text-secondary)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--text-primary)] border border-[var(--layout-border)]"
                   }`}
+                  title={!p.connected ? "此平台未连接，请前往设置页连接" : ""}
                 >
-                  {p.name}
+                  {p.name} {!p.connected && "(未连接)"}
                 </Badge>
               ))}
               <Badge variant="outline" className="border-dashed border-[var(--layout-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--text-secondary)] cursor-pointer bg-transparent transition-colors">
@@ -334,13 +400,17 @@ export function Editor() {
                 <Badge 
                   key={p.id} 
                   variant={p.selected ? "default" : "secondary"}
+                  onClick={() => toggleVideoPlatform(p.id)}
                   className={`cursor-pointer transition-all duration-300 px-3 py-1 ${
-                    p.selected 
-                      ? "bg-primary text-white shadow-[0_0_10px_rgba(124,58,237,0.3)] hover:bg-primary/90" 
-                      : "bg-[var(--layout-bg)] text-[var(--text-secondary)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--text-primary)] border border-[var(--layout-border)]"
+                    !p.connected 
+                      ? "opacity-50 cursor-not-allowed bg-[var(--layout-bg)] text-[var(--text-secondary)] border border-[var(--layout-border)]"
+                      : p.selected 
+                        ? "bg-primary text-white shadow-[0_0_10px_rgba(124,58,237,0.3)] hover:bg-primary/90" 
+                        : "bg-[var(--layout-bg)] text-[var(--text-secondary)] hover:bg-[var(--sidebar-hover)] hover:text-[var(--text-primary)] border border-[var(--layout-border)]"
                   }`}
+                  title={!p.connected ? "此平台未连接，请前往设置页连接" : ""}
                 >
-                  {p.name}
+                  {p.name} {!p.connected && "(未连接)"}
                 </Badge>
               ))}
             </div>
