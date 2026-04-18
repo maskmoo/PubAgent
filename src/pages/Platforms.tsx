@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Sparkles, CheckCircle2, Globe, ArrowRight, Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { Search, Sparkles, CheckCircle2, Globe, ArrowRight, Loader2, RefreshCw, XCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const defaultPlatforms = [
   { id: "zhihu", name: "知乎", url: "zhihu.com", status: "active", icon: Globe },
@@ -17,18 +17,62 @@ export function Platforms() {
   const [newUrl, setNewUrl] = useState("");
   const [isDiscovering, setIsDiscovering] = useState(false);
   const [discoveredPlatform, setDiscoveredPlatform] = useState<string | null>(null);
+  
+  // Platform status detection states
+  const [checkingStatus, setCheckingStatus] = useState<Record<string, boolean>>({});
+  const [platformStatus, setPlatformStatus] = useState<Record<string, 'active' | 'error' | 'expired'>>(
+    Object.fromEntries(defaultPlatforms.map(p => [p.id, 'active']))
+  );
+
+  // Initial random status check on mount to make it look alive
+  useEffect(() => {
+    // Randomly set some to error or expired just for demo purposes initially
+    const initialStatus = { ...platformStatus };
+    if (Math.random() > 0.5) initialStatus.jianshu = 'expired';
+    setPlatformStatus(initialStatus);
+  }, []);
 
   const handleDiscovery = () => {
     if (!newUrl) return;
     setIsDiscovering(true);
     setDiscoveredPlatform(null);
 
-    // Simulate AI Vision Discovery
+    // Simulate AI Vision Discovery with a realistic URL parsing
     setTimeout(() => {
       setIsDiscovering(false);
-      setDiscoveredPlatform(newUrl);
+      
+      // Extract domain name from URL
+      try {
+        const urlObj = new URL(newUrl.startsWith('http') ? newUrl : `https://${newUrl}`);
+        setDiscoveredPlatform(urlObj.hostname.replace('www.', ''));
+      } catch (e) {
+        setDiscoveredPlatform(newUrl);
+      }
+      
       setNewUrl("");
     }, 3000);
+  };
+
+  const checkPlatformStatus = (id: string) => {
+    setCheckingStatus(prev => ({ ...prev, [id]: true }));
+    
+    // Simulate network check
+    setTimeout(() => {
+      setCheckingStatus(prev => ({ ...prev, [id]: false }));
+      
+      // Randomly resolve to success or error for demo
+      const statuses: Array<'active' | 'error' | 'expired'> = ['active', 'active', 'active', 'expired'];
+      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+      
+      setPlatformStatus(prev => ({ ...prev, [id]: randomStatus }));
+    }, 1500 + Math.random() * 1000);
+  };
+
+  const checkAllPlatforms = () => {
+    defaultPlatforms.forEach(p => checkPlatformStatus(p.id));
+    if (discoveredPlatform) {
+      checkPlatformStatus('discovered');
+    }
   };
 
   return (
@@ -118,31 +162,90 @@ export function Platforms() {
 
       {/* Available Platforms Grid */}
       <div>
-        <h3 className="text-lg font-medium mb-6 flex items-center gap-2 text-[var(--text-primary)] transition-colors duration-300">
-          <div className="p-1.5 bg-[var(--layout-bg)] rounded-md border border-[var(--layout-border)] transition-colors duration-300">
-            <Globe className="w-4 h-4 text-[var(--text-secondary)] transition-colors duration-300" />
-          </div>
-          已适配平台
-        </h3>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-medium flex items-center gap-2 text-[var(--text-primary)] transition-colors duration-300">
+            <div className="p-1.5 bg-[var(--layout-bg)] rounded-md border border-[var(--layout-border)] transition-colors duration-300">
+              <Globe className="w-4 h-4 text-[var(--text-secondary)] transition-colors duration-300" />
+            </div>
+            已适配平台
+          </h3>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={checkAllPlatforms}
+            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors duration-300"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" /> 检查全部状态
+          </Button>
+        </div>
+        
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {defaultPlatforms.map((platform) => (
-            <Card key={platform.id} className="bg-[var(--card-bg)] border-[var(--layout-border)] hover:border-primary/30 hover:bg-[var(--sidebar-hover)] transition-all duration-300 group cursor-pointer overflow-hidden relative shadow-sm">
-              <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <CardContent className="p-6 flex flex-col items-center text-center space-y-5 relative z-10">
-                <div className="w-16 h-16 rounded-2xl bg-[var(--layout-bg)] border border-[var(--layout-border)] flex items-center justify-center group-hover:scale-110 group-hover:border-primary/30 transition-all duration-500 shadow-sm">
-                  <platform.icon className="w-7 h-7 text-[var(--text-secondary)] group-hover:text-primary transition-colors duration-500" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-lg text-[var(--text-primary)] group-hover:text-primary transition-colors duration-300">{platform.name}</h4>
-                  <p className="text-xs text-[var(--text-secondary)] font-mono mt-1.5 bg-[var(--layout-bg)] px-2 py-0.5 rounded-md border border-[var(--layout-border)] inline-block transition-colors duration-300">{platform.url}</p>
-                </div>
-                <Badge variant="outline" className="px-3 bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 shadow-[0_0_10px_rgba(34,197,94,0.05)] transition-colors duration-300">
-                  <CheckCircle2 className="w-3 h-3 mr-1.5" />
-                  账号已连接
-                </Badge>
-              </CardContent>
-            </Card>
-          ))}
+          {defaultPlatforms.map((platform) => {
+            const isChecking = checkingStatus[platform.id];
+            const status = platformStatus[platform.id] || 'active';
+            
+            return (
+              <Card key={platform.id} className="bg-[var(--card-bg)] border-[var(--layout-border)] hover:border-primary/30 hover:bg-[var(--sidebar-hover)] transition-all duration-300 group cursor-pointer overflow-hidden relative shadow-sm">
+                <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <CardContent className="p-6 flex flex-col items-center text-center space-y-5 relative z-10">
+                  <div className="absolute top-3 right-3">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        checkPlatformStatus(platform.id);
+                      }}
+                      disabled={isChecking}
+                      className="w-6 h-6 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--layout-bg)]"
+                    >
+                      <RefreshCw className={`w-3 h-3 ${isChecking ? 'animate-spin text-primary' : ''}`} />
+                    </Button>
+                  </div>
+                  
+                  <div className="w-16 h-16 rounded-2xl bg-[var(--layout-bg)] border border-[var(--layout-border)] flex items-center justify-center group-hover:scale-110 group-hover:border-primary/30 transition-all duration-500 shadow-sm">
+                    <platform.icon className="w-7 h-7 text-[var(--text-secondary)] group-hover:text-primary transition-colors duration-500" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-lg text-[var(--text-primary)] group-hover:text-primary transition-colors duration-300">{platform.name}</h4>
+                    <p className="text-xs text-[var(--text-secondary)] font-mono mt-1.5 bg-[var(--layout-bg)] px-2 py-0.5 rounded-md border border-[var(--layout-border)] inline-block transition-colors duration-300">{platform.url}</p>
+                  </div>
+                  
+                  <AnimatePresence mode="wait">
+                    {isChecking ? (
+                      <motion.div key="checking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <Badge variant="outline" className="px-3 bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.05)] transition-colors duration-300">
+                          <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                          检测中...
+                        </Badge>
+                      </motion.div>
+                    ) : status === 'active' ? (
+                      <motion.div key="active" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <Badge variant="outline" className="px-3 bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 shadow-[0_0_10px_rgba(34,197,94,0.05)] transition-colors duration-300">
+                          <CheckCircle2 className="w-3 h-3 mr-1.5" />
+                          账号已连接
+                        </Badge>
+                      </motion.div>
+                    ) : status === 'expired' ? (
+                      <motion.div key="expired" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <Badge variant="outline" className="px-3 bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border-yellow-500/20 shadow-[0_0_10px_rgba(234,179,8,0.05)] transition-colors duration-300">
+                          <XCircle className="w-3 h-3 mr-1.5" />
+                          登录已过期
+                        </Badge>
+                      </motion.div>
+                    ) : (
+                      <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <Badge variant="outline" className="px-3 bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.05)] transition-colors duration-300">
+                          <XCircle className="w-3 h-3 mr-1.5" />
+                          连接失败
+                        </Badge>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </CardContent>
+              </Card>
+            );
+          })}
           
           {/* Add discovered platform dynamically */}
           {discoveredPlatform && (
@@ -151,17 +254,53 @@ export function Platforms() {
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-50" />
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl" />
                 <CardContent className="p-6 flex flex-col items-center text-center space-y-5 relative z-10">
+                  <div className="absolute top-3 right-3">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        checkPlatformStatus('discovered');
+                      }}
+                      disabled={checkingStatus['discovered']}
+                      className="w-6 h-6 text-primary hover:bg-primary/10"
+                    >
+                      <RefreshCw className={`w-3 h-3 ${checkingStatus['discovered'] ? 'animate-spin' : ''}`} />
+                    </Button>
+                  </div>
+                  
                   <div className="w-16 h-16 rounded-2xl bg-primary/10 dark:bg-primary/20 border border-primary/40 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-[0_0_15px_rgba(124,58,237,0.1)] dark:shadow-[0_0_15px_rgba(124,58,237,0.2)]">
                     <Sparkles className="w-7 h-7 text-primary" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-lg text-[var(--text-primary)] transition-colors duration-300">新平台</h4>
+                    <h4 className="font-bold text-lg text-[var(--text-primary)] transition-colors duration-300">新探索平台</h4>
                     <p className="text-xs text-primary/70 font-mono mt-1.5 bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20 inline-block truncate max-w-[120px] transition-colors duration-300">{discoveredPlatform}</p>
                   </div>
-                  <Badge className="px-3 bg-primary text-white border-0 shadow-[0_0_15px_rgba(124,58,237,0.4)] hover:bg-primary">
-                    <Sparkles className="w-3 h-3 mr-1.5" />
-                    AI 自动适配
-                  </Badge>
+                  
+                  <AnimatePresence mode="wait">
+                    {checkingStatus['discovered'] ? (
+                      <motion.div key="checking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <Badge variant="outline" className="px-3 bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.05)] transition-colors duration-300">
+                          <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                          检测中...
+                        </Badge>
+                      </motion.div>
+                    ) : platformStatus['discovered'] === 'expired' ? (
+                      <motion.div key="expired" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <Badge variant="outline" className="px-3 bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border-yellow-500/20 shadow-[0_0_10px_rgba(234,179,8,0.05)] transition-colors duration-300">
+                          <XCircle className="w-3 h-3 mr-1.5" />
+                          登录已过期
+                        </Badge>
+                      </motion.div>
+                    ) : (
+                      <motion.div key="active" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <Badge className="px-3 bg-primary text-white border-0 shadow-[0_0_15px_rgba(124,58,237,0.4)] hover:bg-primary">
+                          <Sparkles className="w-3 h-3 mr-1.5" />
+                          AI 自动适配成功
+                        </Badge>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </CardContent>
               </Card>
             </motion.div>
