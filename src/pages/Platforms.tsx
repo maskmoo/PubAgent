@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Search, Sparkles, CheckCircle2, Globe, ArrowRight, Loader2, RefreshCw, XCircle, FileJson, Play, LogIn } from "lucide-react";
+import { Search, Sparkles, CheckCircle2, Globe, ArrowRight, Loader2, RefreshCw, XCircle, FileJson, Play } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Dialog,
@@ -224,18 +224,6 @@ export function Platforms() {
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleLoginRedirect(platform.url);
-                      }}
-                      className="w-6 h-6 text-[var(--text-secondary)] hover:text-primary hover:bg-[var(--layout-bg)]"
-                      title={`前往 ${platform.name} 登录`}
-                    >
-                      <LogIn className="w-3 h-3" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
                       onClick={(e) => openWorkflowDialog(e, platform)}
                       className="w-6 h-6 text-[var(--text-secondary)] hover:text-primary hover:bg-[var(--layout-bg)]"
                       title="查看自动化工作流"
@@ -257,8 +245,18 @@ export function Platforms() {
                     </Button>
                   </div>
                   
-                  <div className="w-12 h-12 rounded-2xl bg-[var(--layout-bg)] border border-[var(--layout-border)] flex items-center justify-center group-hover:scale-110 group-hover:border-primary/30 transition-all duration-500 shadow-sm">
+                  <div 
+                    className="w-12 h-12 rounded-2xl bg-[var(--layout-bg)] border border-[var(--layout-border)] flex items-center justify-center group-hover:scale-110 group-hover:border-primary/30 transition-all duration-500 shadow-sm relative group/icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleLoginRedirect(platform.url);
+                    }}
+                    title={`点击前往 ${platform.name} 登录`}
+                  >
                     <platform.icon className="w-5 h-5 text-[var(--text-secondary)] group-hover:text-primary transition-colors duration-500" />
+                    <div className="absolute inset-0 bg-primary/10 rounded-2xl opacity-0 group-hover/icon:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="text-[10px] font-bold text-primary opacity-0 group-hover/icon:opacity-100">登录</span>
+                    </div>
                   </div>
                   <div className="space-y-1">
                     <h4 className="font-bold text-base text-[var(--text-primary)] group-hover:text-primary transition-colors duration-300">{platform.name}</h4>
@@ -318,18 +316,6 @@ export function Platforms() {
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleLoginRedirect(discoveredPlatform);
-                      }}
-                      className="w-6 h-6 text-primary/70 hover:text-primary hover:bg-primary/10"
-                      title={`前往 ${discoveredPlatform} 登录`}
-                    >
-                      <LogIn className="w-3 h-3" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
                       onClick={(e) => openWorkflowDialog(e, { name: "新探索平台", workflow: `https://${discoveredPlatform}/write`, id: "discovered" })}
                       className="w-6 h-6 text-primary/70 hover:text-primary hover:bg-primary/10"
                       title="查看自动化工作流"
@@ -351,8 +337,18 @@ export function Platforms() {
                     </Button>
                   </div>
                   
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 dark:bg-primary/20 border border-primary/40 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-[0_0_15px_rgba(124,58,237,0.1)] dark:shadow-[0_0_15px_rgba(124,58,237,0.2)]">
+                  <div 
+                    className="w-12 h-12 rounded-2xl bg-primary/10 dark:bg-primary/20 border border-primary/40 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-[0_0_15px_rgba(124,58,237,0.1)] dark:shadow-[0_0_15px_rgba(124,58,237,0.2)] relative group/icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleLoginRedirect(discoveredPlatform);
+                    }}
+                    title={`点击前往 ${discoveredPlatform} 登录`}
+                  >
                     <Sparkles className="w-5 h-5 text-primary" />
+                    <div className="absolute inset-0 bg-primary/20 rounded-2xl opacity-0 group-hover/icon:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="text-[10px] font-bold text-primary opacity-0 group-hover/icon:opacity-100">登录</span>
+                    </div>
                   </div>
                   <div className="space-y-1">
                     <h4 className="font-bold text-base text-[var(--text-primary)] transition-colors duration-300">新探索平台</h4>
