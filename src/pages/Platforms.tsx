@@ -27,16 +27,14 @@ export function Platforms() {
   
   // Platform status detection states
   const [checkingStatus, setCheckingStatus] = useState<Record<string, boolean>>({});
-  const [platformStatus, setPlatformStatus] = useState<Record<string, 'active' | 'error' | 'expired'>>(
-    Object.fromEntries(defaultPlatforms.map(p => [p.id, 'active']))
+  const [platformStatus, setPlatformStatus] = useState<Record<string, 'connected' | 'disconnected' | 'error' | 'expired'>>(
+    Object.fromEntries(defaultPlatforms.map(p => [p.id, 'disconnected']))
   );
 
-  // Initial random status check on mount to make it look alive
   useEffect(() => {
-    // Randomly set some to error or expired just for demo purposes initially
-    const initialStatus = { ...platformStatus };
-    if (Math.random() > 0.5) initialStatus.jianshu = 'expired';
-    setPlatformStatus(initialStatus);
+    defaultPlatforms.forEach(p => {
+      void checkPlatformStatus(p.id);
+    });
   }, []);
 
   const handleDiscovery = async () => {
@@ -54,6 +52,7 @@ export function Platforms() {
       
       if (data.success) {
         setDiscoveredPlatform(data.platform);
+        setPlatformStatus(prev => ({ ...prev, discovered: 'disconnected' }));
       }
     } catch (error) {
       console.error(error);
@@ -65,26 +64,28 @@ export function Platforms() {
     }
   };
 
-  const checkPlatformStatus = (id: string) => {
+  const checkPlatformStatus = async (id: string) => {
     setCheckingStatus(prev => ({ ...prev, [id]: true }));
     
-    // Simulate network check
-    setTimeout(() => {
+    try {
+      const resp = await fetch(`/api/platforms/${id}/status`);
+      const data = await resp.json();
+      if (data?.success && data?.status) {
+        setPlatformStatus(prev => ({ ...prev, [id]: data.status }));
+      } else {
+        setPlatformStatus(prev => ({ ...prev, [id]: 'error' }));
+      }
+    } catch (e) {
+      setPlatformStatus(prev => ({ ...prev, [id]: 'error' }));
+    } finally {
       setCheckingStatus(prev => ({ ...prev, [id]: false }));
-      
-      // In a real app, this would check if the authentication token/cookie is valid
-      // For demo, we just randomly resolve to success or error
-      const statuses: Array<'active' | 'error' | 'expired'> = ['active', 'active', 'active', 'active', 'active', 'expired'];
-      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-      
-      setPlatformStatus(prev => ({ ...prev, [id]: randomStatus }));
-    }, 1500 + Math.random() * 1000);
+    }
   };
 
   const checkAllPlatforms = () => {
-    defaultPlatforms.forEach(p => checkPlatformStatus(p.id));
+    defaultPlatforms.forEach(p => void checkPlatformStatus(p.id));
     if (discoveredPlatform) {
-      checkPlatformStatus('discovered');
+      void checkPlatformStatus('discovered');
     }
   };
 
@@ -208,7 +209,7 @@ export function Platforms() {
         <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {defaultPlatforms.map((platform) => {
             const isChecking = checkingStatus[platform.id];
-            const status = platformStatus[platform.id] || 'active';
+            const status = platformStatus[platform.id] || 'disconnected';
             
             return (
               <Card key={platform.id} className="bg-[var(--card-bg)] border-[var(--layout-border)] hover:border-primary/30 hover:bg-[var(--sidebar-hover)] transition-all duration-300 group cursor-pointer overflow-hidden relative shadow-sm">
@@ -255,11 +256,17 @@ export function Platforms() {
                           检测中...
                         </Badge>
                       </motion.div>
-                    ) : status === 'active' ? (
+                    ) : status === 'connected' ? (
                       <motion.div key="active" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                         <Badge variant="outline" className="px-2.5 py-0.5 text-[10px] bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20 shadow-[0_0_10px_rgba(34,197,94,0.05)] transition-colors duration-300">
                           <CheckCircle2 className="w-3 h-3 mr-1" />
                           已连接
+                        </Badge>
+                      </motion.div>
+                    ) : status === 'disconnected' ? (
+                      <motion.div key="disconnected" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <Badge variant="outline" className="px-2.5 py-0.5 text-[10px] bg-[var(--layout-bg)] text-[var(--text-secondary)] border-[var(--layout-border)] transition-colors duration-300">
+                          未连接
                         </Badge>
                       </motion.div>
                     ) : status === 'expired' ? (
@@ -331,6 +338,18 @@ export function Platforms() {
                           检测中...
                         </Badge>
                       </motion.div>
+                    ) : platformStatus['discovered'] === 'connected' ? (
+                      <motion.div key="connected" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <Badge className="px-2.5 py-0.5 text-[10px] bg-primary text-white border-0 shadow-[0_0_15px_rgba(124,58,237,0.4)] hover:bg-primary">
+                          自动适配成功
+                        </Badge>
+                      </motion.div>
+                    ) : platformStatus['discovered'] === 'disconnected' ? (
+                      <motion.div key="disconnected" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <Badge variant="outline" className="px-2.5 py-0.5 text-[10px] bg-primary/10 text-primary border-primary/20">
+                          未连接
+                        </Badge>
+                      </motion.div>
                     ) : platformStatus['discovered'] === 'expired' ? (
                       <motion.div key="expired" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                         <Badge variant="outline" className="px-2.5 py-0.5 text-[10px] bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border-yellow-500/20 shadow-[0_0_10px_rgba(234,179,8,0.05)] transition-colors duration-300">
@@ -339,10 +358,9 @@ export function Platforms() {
                         </Badge>
                       </motion.div>
                     ) : (
-                      <motion.div key="active" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                        <Badge className="px-2.5 py-0.5 text-[10px] bg-primary text-white border-0 shadow-[0_0_15px_rgba(124,58,237,0.4)] hover:bg-primary">
-                          <Sparkles className="w-3 h-3 mr-1" />
-                          自动适配成功
+                      <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                        <Badge variant="outline" className="px-2.5 py-0.5 text-[10px] bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20">
+                          连接失败
                         </Badge>
                       </motion.div>
                     )}

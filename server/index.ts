@@ -12,6 +12,41 @@ app.use(express.json());
 
 const port = process.env.PORT || 3001;
 
+app.get('/api/platforms/:id/status', (req, res) => {
+  try {
+    const platformId = req.params.id;
+    const stmt = db.prepare('SELECT cookies, updated_at FROM platform_sessions WHERE platform_id = ?');
+    const row = stmt.get(platformId) as any;
+
+    if (!row || !row.cookies) {
+      return res.json({ success: true, status: 'disconnected' });
+    }
+
+    return res.json({ success: true, status: 'connected' });
+  } catch (error) {
+    console.error('Platform status error:', error);
+    res.status(500).json({ success: false, status: 'error' });
+  }
+});
+
+app.post('/api/platforms/:id/session', (req, res) => {
+  try {
+    const platformId = req.params.id;
+    const { cookies } = req.body;
+
+    const stmt = db.prepare(
+      'INSERT INTO platform_sessions (platform_id, cookies, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP) ' +
+      'ON CONFLICT(platform_id) DO UPDATE SET cookies=excluded.cookies, updated_at=CURRENT_TIMESTAMP'
+    );
+    stmt.run(platformId, JSON.stringify(cookies || []));
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Platform session save error:', error);
+    res.status(500).json({ success: false });
+  }
+});
+
 // Helper to create an AI provider instance based on request headers
 const getProvider = (req: express.Request) => {
   const apiKey = req.headers.authorization?.replace('Bearer ', '') || '';
