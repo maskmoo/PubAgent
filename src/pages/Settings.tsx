@@ -15,6 +15,7 @@ export function Settings() {
 
   const [isTestingAnthropic, setIsTestingAnthropic] = useState(false);
   const [anthropicStatus, setAnthropicStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [supervisionMode, setSupervisionMode] = useState<'none' | 'optional' | 'required'>('optional');
 
   const handleTestOpenAI = async () => {
     if (!openAiKey) return;
@@ -236,9 +237,13 @@ export function Settings() {
                   <Label className="text-base text-[var(--text-primary)] transition-colors duration-300">人类审核模式 (Supervision Mode)</Label>
                   <p className="text-xs text-[var(--text-secondary)] transition-colors duration-300">AI 探索新平台后，是否需要人类确认生成的 Markdown 规范。</p>
                 </div>
-                <select className="bg-[var(--input-bg)] border border-[var(--layout-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer appearance-none transition-colors duration-300">
+                <select
+                  value={supervisionMode}
+                  onChange={(e) => setSupervisionMode(e.target.value as 'none' | 'optional' | 'required')}
+                  className="bg-[var(--input-bg)] border border-[var(--layout-border)] rounded-lg px-4 py-2.5 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer appearance-none transition-colors duration-300"
+                >
                   <option value="none">无需干预 (全自动)</option>
-                  <option value="optional" selected>可选审核 (推荐)</option>
+                  <option value="optional">可选审核 (推荐)</option>
                   <option value="required">必须审核 (最安全)</option>
                 </select>
               </div>
