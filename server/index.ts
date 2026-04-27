@@ -104,7 +104,7 @@ app.post('/api/generate-tags', async (req, res) => {
 });
 
 app.post('/api/publish', async (req, res) => {
-  const { content, platforms } = req.body;
+  const { content, platforms, type } = req.body;
   const title = req.body.title || 'Untitled';
   
   if (!platforms || platforms.length === 0) {
@@ -112,7 +112,11 @@ app.post('/api/publish', async (req, res) => {
   }
 
   try {
-    // Run puppeteer scripts in parallel for each selected platform
+    // 1. Record this task in the database so it shows up in "System Logs / Recent Tasks"
+    const stmt = db.prepare('INSERT INTO drafts (type, title, content, platforms) VALUES (?, ?, ?, ?)');
+    stmt.run(type || 'article', title, content || '', JSON.stringify(platforms));
+
+    // 2. Run puppeteer scripts in parallel for each selected platform
     const results = await Promise.all(
       platforms.map(async (platform: string) => {
         try {
