@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sparkles, Send, Loader2, Save, FileText, Video, UploadCloud } from "lucide-react";
+import { Sparkles, Send, Loader2, Save, FileText, Video, UploadCloud, Terminal, ChevronDown, ChevronUp } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { motion, AnimatePresence } from "framer-motion";
@@ -102,6 +102,14 @@ export function Editor() {
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [draftSaved, setDraftSaved] = useState(false);
 
+  // Debug Log states
+  const [logs, setLogs] = useState<{time: string, msg: string, type: 'info'|'success'|'error'}[]>([]);
+  const [showLogs, setShowLogs] = useState(false);
+
+  const addLog = (msg: string, type: 'info'|'success'|'error' = 'info') => {
+    setLogs(prev => [...prev, { time: new Date().toLocaleTimeString(), msg, type }]);
+  };
+
   const handleOptimize = async () => {
     setIsOptimizing(true);
     setOptimizedContent("");
@@ -169,13 +177,21 @@ export function Editor() {
 
     setIsPublishing(true);
     setPublishSuccess(false);
+    
+    // Reset and open logs
+    setLogs([]);
+    setShowLogs(true);
+    addLog(`[System] 开始准备${activeTab === 'article' ? '图文' : '视频'}发布任务...`, 'info');
 
     try {
       const platforms = activeTab === 'article' 
         ? selectedArticlePlatforms.map(p => p.id)
         : selectedVideoPlatforms.map(p => p.id);
+        
+      addLog(`[Info] 选中分发平台: ${platforms.join(', ')}`, 'info');
+      addLog(`[Info] 正在向服务器发送发布请求...`, 'info');
 
-      await fetch("/api/publish", {
+      const response = await fetch("/api/publish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -186,13 +202,31 @@ export function Editor() {
         }),
       });
 
-      setPublishSuccess(true);
-      // Reset success state after a while
-      setTimeout(() => setPublishSuccess(false), 3000);
-    } catch (error) {
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        addLog(`[Success] 服务器已处理完毕！`, 'success');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        data.results?.forEach((r: any) => {
+          if (r.success) {
+            addLog(`[Platform: ${r.platform}] 发布成功`, 'success');
+          } else {
+            addLog(`[Platform: ${r.platform}] 发布失败: ${r.error}`, 'error');
+          }
+        });
+        
+        setPublishSuccess(true);
+        // Reset success state after a while
+        setTimeout(() => setPublishSuccess(false), 3000);
+      } else {
+        addLog(`[Error] 服务器异常: ${data.error || '未知错误'}`, 'error');
+      }
+    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
       console.error(error);
+      addLog(`[Error] 网络请求失败: ${error.message}`, 'error');
     } finally {
       setIsPublishing(false);
+      addLog(`[System] 发布流程结束。`, 'info');
     }
   };
 
@@ -527,6 +561,49 @@ export function Editor() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Debug Logs Panel */}
+      <div className="flex flex-col gap-2">
+        <Button 
+          variant="ghost" 
+          className="w-fit text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--layout-bg)] gap-2 px-3 py-1.5 h-auto transition-colors duration-300"
+          onClick={() => setShowLogs(!showLogs)}
+        >
+          <Terminal className="w-4 h-4" />
+          发布调试日志
+          {showLogs ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+        </Button>
+        
+        <AnimatePresence>
+          {showLogs && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <Card className="bg-[var(--code-bg)] border-[var(--layout-border)] shadow-inner">
+                <CardContent className="p-4 font-mono text-xs h-48 overflow-y-auto flex flex-col gap-2">
+                  {logs.length === 0 ? (
+                    <span className="text-[var(--text-secondary)]/50 italic">暂无发布日志，点击「智能发布」后在此显示...</span>
+                  ) : (
+                    logs.map((log, i) => (
+                      <div key={i} className="flex gap-3 leading-relaxed">
+                        <span className="text-[var(--text-secondary)]/70 shrink-0">[{log.time}]</span>
+                        <span className={
+                          log.type === 'error' ? 'text-red-400' : 
+                          log.type === 'success' ? 'text-green-400' : 
+                          'text-blue-400'
+                        }>{log.msg}</span>
+                      </div>
+                    ))
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
