@@ -1,9 +1,8 @@
-// We use dynamic import for puppeteer to bypass static ESM resolution issues
-// in some environments (like tsx watch on Windows).
+// In puppeteer v22, static import works fine and avoids the v24 ESM issues
+import puppeteer from 'puppeteer';
 import { db } from './db.js';
 
 export async function publishToPlatform(platform: string, title?: string, content?: string) {
-  const { default: puppeteer } = await import('puppeteer');
   console.log(`[Puppeteer] Starting publishing process for ${platform}...`);
   
   // Auto-detect if we have a GUI available (like on a local machine) vs a headless server
