@@ -4,12 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"vite\" \"npm run dev:server\"",
+    "dev:frontend": "vite",
+    "dev:backend": "tsx server/index.ts",
+    "dev": "concurrently \"pnpm run dev:frontend\" \"pnpm run dev:backend\"",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "check": "tsc -b --noEmit",
-    "dev:server": "tsx server/index.ts"
+    "dev:server": "tsx server/index.ts",
+    "postinstall": "puppeteer browsers install chrome"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.71",
