@@ -4,6 +4,7 @@ import { streamText, generateObject } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
 import { z } from 'zod';
 import { db } from './db.js';
+import { publishToPlatform } from './puppeteer.js';
 
 const app = express();
 app.use(cors());
