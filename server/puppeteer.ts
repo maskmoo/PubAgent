@@ -1,10 +1,14 @@
 import puppeteer from 'puppeteer';
+import { db } from './db.js';
 
 export async function publishToPlatform(platform: string, title?: string, content?: string) {
   console.log(`[Puppeteer] Starting publishing process for ${platform}...`);
   
+  // Auto-detect if we have a GUI available (like on a local machine) vs a headless server
+  const isHeadless = !process.env.DISPLAY && process.platform !== 'win32' && process.platform !== 'darwin';
+  
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: isHeadless,
     args: [
       '--no-sandbox', 
       '--disable-setuid-sandbox',
@@ -21,9 +25,31 @@ export async function publishToPlatform(platform: string, title?: string, conten
     
     console.log(`[Puppeteer] Navigating to ${platform}...`);
     
-    // Simulated scripts for different platforms
-    // In a real application, you would inject cookies here:
-    // await page.setCookie(...savedCookies);
+    // Inject cookies from database
+    try {
+      const stmt = db.prepare('SELECT cookies FROM platform_sessions WHERE platform_id = ?');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const row = stmt.get(platform) as any;
+      if (row && row.cookies) {
+        const cookies = JSON.parse(row.cookies);
+        if (cookies.length > 0) {
+          // ensure valid format for puppeteer
+          const validCookies = cookies.map((c: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
+            name: c.name,
+            value: c.value,
+            domain: c.domain,
+            path: c.path || '/',
+            httpOnly: c.httpOnly || false,
+            secure: c.secure || false,
+            sameSite: c.sameSite || 'Lax'
+          }));
+          await page.setCookie(...validCookies);
+          console.log(`[Puppeteer] Injected ${validCookies.length} cookies for ${platform}.`);
+        }
+      }
+    } catch (dbError) {
+      console.error(`[Puppeteer] Failed to load cookies from DB for ${platform}:`, dbError);
+    }
     
     if (platform === 'juejin') {
       await page.goto('https://juejin.cn/editor/drafts/new', { waitUntil: 'networkidle2' });

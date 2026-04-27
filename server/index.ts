@@ -120,7 +120,8 @@ app.post('/api/publish', async (req, res) => {
     const results = await Promise.all(
       platforms.map(async (platform: string) => {
         try {
-          return { success: true, platform, title, content };
+          const result = await publishToPlatform(platform, title, content);
+          return { success: result.success, platform, title, content, error: result.error };
         } catch (e: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
           return { success: false, platform, error: e.message };
         }
