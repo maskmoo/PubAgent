@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "check": "tsc -b --noEmit",
-    "dev:server": "tsx watch server/index.ts"
+    "dev:server": "tsx server/index.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.71",
